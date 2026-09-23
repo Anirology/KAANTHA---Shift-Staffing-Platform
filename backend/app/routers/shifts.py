@@ -32,9 +32,15 @@ def list_shifts(role: str | None = None, skill_id: int | None = None, date: date
 
 
 @router.get("/shifts/{shift_id}", response_model=ShiftResponse)
-def get_shift(shift_id: int, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_shift(shift_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     shift = db.scalar(select(Shift).options(joinedload(Shift.business), joinedload(Shift.required_skill)).where(Shift.id == shift_id))
     if not shift: raise HTTPException(404, "Shift not found.")
+    if user.role == "BUSINESS" and (not user.business or shift.business_id != user.business.id):
+        raise HTTPException(404, "Shift not found.")
+    if user.role == "WORKER" and shift.status != ShiftStatus.OPEN.value:
+        has_applied = user.worker and db.scalar(select(Application.id).where(Application.shift_id == shift.id, Application.worker_id == user.worker.id))
+        if not has_applied:
+            raise HTTPException(404, "Shift not found.")
     return shift_response(shift, db)
 
 
@@ -63,6 +69,8 @@ def update_shift(shift_id: int, data: ShiftPatch, business: Business = Depends(g
     start, end = values.get("start_time", shift.start_time), values.get("end_time", shift.end_time)
     if start >= end: raise HTTPException(422, "start_time must be before end_time")
     for key, value in values.items(): setattr(shift, key, value)
+    if shift.status == ShiftStatus.FILLED.value and accepted < shift.required_workers:
+        shift.status = ShiftStatus.OPEN.value
     db.commit(); db.refresh(shift); return shift_response(shift, db)
 
 

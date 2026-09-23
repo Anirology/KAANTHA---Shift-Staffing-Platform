@@ -3,7 +3,7 @@ import io
 from datetime import date, datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -17,6 +17,8 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 
 
 def filtered_shifts(business_id: int, from_date: date | None, to_date: date | None, db: Session):
+    if from_date and to_date and from_date > to_date:
+        raise HTTPException(422, "from_date must be on or before to_date.")
     query = select(Shift).where(Shift.business_id == business_id)
     if from_date: query = query.where(Shift.date >= from_date)
     if to_date: query = query.where(Shift.date <= to_date)
