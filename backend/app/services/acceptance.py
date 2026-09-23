@@ -6,11 +6,11 @@ from app.models import Application, ApplicationStatus, Attendance, AttendanceSta
 
 
 def accept_application(db: Session, application_id: int, business_id: int) -> Application:
-    application = db.execute(
-        select(Application).join(Application.shift).where(Application.id == application_id, Shift.business_id == business_id).with_for_update()
-    ).scalar_one_or_none()
+    application = db.execute(select(Application).where(Application.id == application_id).with_for_update()).scalar_one_or_none()
     if not application:
         raise HTTPException(404, "Application not found.")
+    if application.shift.business_id != business_id:
+        raise HTTPException(403, "You do not own this application.")
     shift = db.execute(select(Shift).where(Shift.id == application.shift_id).with_for_update()).scalar_one()
     # Serialise acceptance decisions for a worker as well as for the shift.  This
     # prevents concurrent requests for different shifts from double-booking them.

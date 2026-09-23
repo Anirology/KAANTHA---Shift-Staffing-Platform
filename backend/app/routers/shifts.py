@@ -20,6 +20,15 @@ def shift_response(shift: Shift, db: Session) -> ShiftResponse:
     return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, role=shift.role, date=shift.date, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
 
 
+def owned_application(application_id: int, business: Business, db: Session) -> Application:
+    item = db.get(Application, application_id)
+    if not item:
+        raise HTTPException(404, "Application not found.")
+    if item.shift.business_id != business.id:
+        raise HTTPException(403, "You do not own this application.")
+    return item
+
+
 @router.get("/shifts", response_model=list[ShiftResponse])
 def list_shifts(role: str | None = None, skill_id: int | None = None, date: date | None = None, min_payment: Decimal | None = None, status: ShiftStatus | None = None, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
     query = select(Shift).options(joinedload(Shift.business), joinedload(Shift.required_skill))
@@ -107,16 +116,14 @@ def accept(id: int, business: Business = Depends(get_business), db: Session = De
 
 @router.patch("/applications/{id}/reject", response_model=ApplicationResponse)
 def reject(id: int, data: RejectionRequest, business: Business = Depends(get_business), db: Session = Depends(get_db)):
-    item = db.scalar(select(Application).join(Application.shift).where(Application.id == id, Shift.business_id == business.id))
-    if not item: raise HTTPException(404, "Application not found.")
+    item = owned_application(id, business, db)
     if item.status != ApplicationStatus.PENDING.value: raise HTTPException(409, "Only pending applications may be rejected.")
     item.status = ApplicationStatus.REJECTED.value; item.rejection_reason = data.reason; db.commit(); db.refresh(item); return application_response(item)
 
 
 @router.patch("/applications/{id}/attendance", response_model=ApplicationResponse)
 def attendance(id: int, data: AttendanceRequest, business: Business = Depends(get_business), db: Session = Depends(get_db)):
-    item = db.scalar(select(Application).join(Application.shift).where(Application.id == id, Shift.business_id == business.id))
-    if not item: raise HTTPException(404, "Application not found.")
+    item = owned_application(id, business, db)
     if item.status != ApplicationStatus.ACCEPTED.value: raise HTTPException(409, "Attendance can only be marked for accepted applications.")
     item.attendance.status = data.status.value; db.commit(); db.refresh(item); return application_response(item)
 
