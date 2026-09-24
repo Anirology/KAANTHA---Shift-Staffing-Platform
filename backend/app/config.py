@@ -1,4 +1,5 @@
 import secrets
+import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -19,3 +20,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+if os.getenv("VERCEL"):
+    if settings.database_url.startswith("sqlite"):
+        raise RuntimeError("DATABASE_URL must point to a persistent database on Vercel.")
+    if not os.getenv("JWT_SECRET"):
+        raise RuntimeError("JWT_SECRET must be set on Vercel so login tokens remain valid.")

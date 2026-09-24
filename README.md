@@ -29,6 +29,16 @@ starter skills; it does not delete or modify existing users, shifts, or skills.
 Swagger is available at `http://127.0.0.1:8000/docs` and health at
 `http://127.0.0.1:8000/health`.
 
+## Vercel deployment
+
+Connect a persistent Postgres database (the Vercel Neon integration supplies
+`DATABASE_URL`) to the production project. Vercel functions cannot persist a
+local SQLite database. Set a long, fixed `JWT_SECRET` in the project's
+production environment variables. The FastAPI service creates missing tables
+and starter skills when it starts on Vercel. Redeploy after changing environment
+variables so the new values reach the functions. The frontend calls `/api/v1`
+on the same domain; `VITE_API_BASE_URL` may be omitted.
+
 For isolated backend tests (which use a temporary SQLite file and do not access
 the configured MySQL database):
 

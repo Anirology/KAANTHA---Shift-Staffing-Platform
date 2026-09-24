@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +12,7 @@ from app.seed_skills import seed
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    if settings.auto_seed_database:
+    if settings.auto_seed_database or os.getenv("VERCEL"):
         seed()
     yield
 

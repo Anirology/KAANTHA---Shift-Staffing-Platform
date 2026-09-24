@@ -2,6 +2,7 @@ fastapi
 uvicorn[standard]
 SQLAlchemy>=2.0,<2.1
 PyMySQL
+psycopg[binary]
 pydantic-settings
 PyJWT
 pwdlib[argon2]
