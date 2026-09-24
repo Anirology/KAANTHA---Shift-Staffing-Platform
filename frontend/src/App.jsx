@@ -12,6 +12,9 @@ import { ShiftForm } from './pages/ShiftForm'
 import { ShiftDetails } from './pages/ShiftDetails'
 import { Applicants } from './pages/Applicants'
 import { MyApplications } from './pages/MyApplications'
+import { WorkerProfile } from './pages/WorkerProfile'
+import { ImportShifts } from './pages/ImportShifts'
+import { Reports } from './pages/Reports'
 import './App.css'
 
 function currentPath() {
@@ -20,8 +23,8 @@ function currentPath() {
 
 function routeFor(path) {
   if (['/login', '/register/worker', '/register/business'].includes(path)) return { path, role: null }
-  if (path === '/worker' || path === '/worker/applications') return { path, role: 'WORKER' }
-  if (path === '/business' || path === '/business/shifts/new') return { path, role: 'BUSINESS' }
+  if (['/worker', '/worker/applications', '/worker/profile'].includes(path)) return { path, role: 'WORKER' }
+  if (['/business', '/business/shifts/new', '/business/shifts/import', '/business/reports'].includes(path)) return { path, role: 'BUSINESS' }
   let match = path.match(/^\/(worker|business)\/shifts\/(\d+)$/)
   if (match) return { path: 'details', role: match[1].toUpperCase(), id: Number(match[2]) }
   match = path.match(/^\/business\/shifts\/(\d+)\/(edit|applicants)$/)
@@ -92,8 +95,14 @@ export default function App() {
     content = <BrowseShifts onNavigate={navigate} />
   } else if (route.path === '/worker/applications') {
     content = <MyApplications onNavigate={navigate} />
+  } else if (route.path === '/worker/profile') {
+    content = <WorkerProfile />
   } else if (route.path === '/business') {
     content = <ManageShifts onNavigate={navigate} />
+  } else if (route.path === '/business/shifts/import') {
+    content = <ImportShifts />
+  } else if (route.path === '/business/reports') {
+    content = <Reports />
   } else if (route.path === '/business/shifts/new' || route.path === 'edit') {
     content = <ShiftForm key={route.id || 'new'} shiftId={route.id} onNavigate={navigate} />
   } else if (route.path === 'details') {

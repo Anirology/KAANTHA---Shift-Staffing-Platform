@@ -7,7 +7,7 @@ import { ShiftCard } from '../components/ShiftCard'
 import { StatusMessage } from '../components/StatusMessage'
 
 export function BrowseShifts({ onNavigate }) {
-  const [filters, setFilters] = useState({ role: '', date: '', min_payment: '' })
+  const [filters, setFilters] = useState({ role: '', skill_id: '', date: '', min_payment: '' })
   const [query, setQuery] = useState({ status: 'OPEN' })
   const [shifts, setShifts] = useState([])
   const [skills, setSkills] = useState([])
@@ -52,6 +52,7 @@ export function BrowseShifts({ onNavigate }) {
       <header className="screen-heading"><div><span className="intro-eyebrow">Worker</span><h1>Browse shifts</h1><p>Find open shifts that fit your schedule and skills.</p></div></header>
       <form className="filter-panel" onSubmit={(event) => { event.preventDefault(); setLoading(true); setError(''); setQuery({ status: 'OPEN', ...filters }) }}>
         <Field id="filter-role" label="Job role" placeholder="e.g. Cashier" value={filters.role} onChange={(event) => setFilters({ ...filters, role: event.target.value })} />
+        <div className="field"><label htmlFor="filter-skill">Required skill</label><select id="filter-skill" value={filters.skill_id} onChange={(event) => setFilters({ ...filters, skill_id: event.target.value })}><option value="">Any skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></div>
         <Field id="filter-date" label="Date" type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
         <Field id="filter-payment" label="Minimum payment (LKR)" type="number" min="0" step="0.01" value={filters.min_payment} onChange={(event) => setFilters({ ...filters, min_payment: event.target.value })} />
         <Button type="submit">Find shifts</Button>
