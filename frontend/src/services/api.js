@@ -1,5 +1,5 @@
 const configuredOrigin = import.meta.env.VITE_API_BASE_URL
-const origin = (configuredOrigin || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : '')).replace(/\/+$/, '')
+const origin = (configuredOrigin || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : window.location.origin)).replace(/\/+$/, '')
 const baseUrl = `${origin}/api/v1`
 const tokenKey = 'kaantha_access_token'
 
@@ -34,7 +34,7 @@ export function clearToken() {
 }
 
 async function request(path, { method = 'GET', body, protectedRequest = false, token, responseType = 'json' } = {}) {
-  if (!validOrigin(origin) || (import.meta.env.PROD && !origin.startsWith('https://'))) throw new Error('Set VITE_API_BASE_URL to the backend origin only (HTTPS in production), without /api/v1.')
+  if (!validOrigin(origin) || (import.meta.env.PROD && !origin.startsWith('https://'))) throw new Error('The KAANTHA API origin is invalid.')
   const bearer = token || (protectedRequest ? getToken() : null)
   let response
   try {
