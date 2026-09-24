@@ -1,8 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "index.py": {
-      "excludeFiles": "{tests/**,.venv/**,.venv313/**,kaantha.db}"
-    }
-  }
-}
