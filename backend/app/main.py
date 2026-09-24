@@ -1,11 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.models import models
 from app.routers import auth, imports, reports, shifts, workers
+from app.seed_skills import seed
 
-app = FastAPI(title="KAANTHA API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    if settings.auto_seed_database:
+        seed()
+    yield
+
+
+app = FastAPI(title="KAANTHA API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
 	CORSMiddleware,
 	allow_origins=settings.allowed_origins,
