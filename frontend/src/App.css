@@ -95,6 +95,10 @@
 .report-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
 .report-tab { border: 1px solid #9bcfc9; background: white; color: #0f4c5c; border-radius: 7px; padding: 10px 15px; font-weight: 700; }
 .report-tab.active { background: #0f4c5c; color: white; }
+.report-results { position: relative; overflow: hidden; }
+.report-results > :not(.report-watermark) { position: relative; z-index: 1; }
+.report-caption { color: #567079; font-size: .9rem; margin: -7px 0 16px !important; }
+.report-watermark { bottom: 12px; color: #0f4c5c; font-size: clamp(3rem, 10vw, 7rem); font-weight: 800; letter-spacing: .12em; opacity: .045; pointer-events: none; position: absolute; right: -8px; user-select: none; }
 .import-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
 .import-summary div { display: grid; gap: 4px; padding: 15px; background: #e7f0ef; border-radius: 7px; }
 .import-summary strong { font-size: 1.6rem; }

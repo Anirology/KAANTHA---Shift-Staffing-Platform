@@ -35,12 +35,12 @@ export function ShiftDetails({ shiftId, accountRole, onNavigate }) {
   return <div className="screen">
     <header className="screen-heading"><div><span className="intro-eyebrow">{accountRole === 'WORKER' ? 'Worker' : 'Business'}</span><h1>Shift details</h1><p>Review the current details from KAANTHA.</p></div></header>
     <DataState loading={loading} error={error} onRetry={retry} empty={!shift} emptyMessage="This shift is unavailable.">
-      <><ShiftCard shift={shift} actions={accountRole === 'BUSINESS' ? <><Button type="button" onClick={() => onNavigate(`/business/shifts/${shiftId}/applicants`)}>View applicants</Button><Button type="button" variant="secondary" onClick={() => onNavigate(`/business/shifts/${shiftId}/edit`)} disabled={['CANCELLED', 'COMPLETED'].includes(shift.status)}>Edit shift</Button></> : null} />
+      {shift && <><ShiftCard shift={shift} actions={accountRole === 'BUSINESS' ? <><Button type="button" onClick={() => onNavigate(`/business/shifts/${shiftId}/applicants`)}>View applicants</Button><Button type="button" variant="secondary" onClick={() => onNavigate(`/business/shifts/${shiftId}/edit`)} disabled={['CANCELLED', 'COMPLETED'].includes(shift.status)}>Edit shift</Button></> : null} />
       {accountRole === 'WORKER' && <section className="panel detail-action">
         <h2>Your application</h2>
         {application ? <><p>Current status: <span className={`chip chip-${application.status?.toLowerCase()}`}>{application.status}</span></p><Button type="button" variant="secondary" onClick={() => onNavigate('/worker/applications')}>My applications</Button></> : <><p>Apply to express interest. A business must accept your application before it is confirmed.</p><Button type="button" disabled={busy || shift.status !== 'OPEN'} onClick={apply}>{busy ? 'Applying…' : shift.status === 'OPEN' ? 'Apply for shift' : 'Applications closed'}</Button></>}
         {actionError && <StatusMessage type="error">{actionError}</StatusMessage>}
-      </section>}</>
+      </section>}</>}
     </DataState>
   </div>
 }
