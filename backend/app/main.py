@@ -1,11 +1,10 @@
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.models import models
 from app.routers import auth, imports, reports, shifts, workers
 from app.seed_skills import seed
 

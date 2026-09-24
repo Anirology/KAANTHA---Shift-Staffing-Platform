@@ -1,48 +1,42 @@
-\# KAANTHA — Shift Staffing Platform
+# KAANTHA — Shift Staffing Platform
 
-
-
-A web application where businesses post temporary shifts and workers apply for them.
-
-
+A web app where businesses post temporary shifts and workers apply for them.
 
 Team: Sutherman Aniruththen (Ani) and Sivaneswaran Kajarsan (Kajan).
 
+## Local development
 
-
-## Backend setup
-
-From `backend/`, use the verified `.venv313` virtual environment, install
-dependencies, and copy `.env.example` to `.env`. Set `DATABASE_URL` to the
-MySQL database Ani created and replace `JWT_SECRET` with a long random value.
-Do not commit `.env`.
+From `backend/`, create a Python 3.13 virtual environment, install the development dependencies, and copy `.env.example` to `.env`. Set `DATABASE_URL` to a local MySQL database and give `JWT_SECRET` a long random value. Keep `.env` out of Git.
 
 ```powershell
-.\.venv313\Scripts\Activate.ps1
-.\.venv313\Scripts\python.exe -m pip install -r requirements.txt
+py -3.13 -m venv .venv313
+.\.venv313\Scripts\python.exe -m pip install -r requirements-dev.txt
 .\.venv313\Scripts\python.exe -m app.seed_skills
 .\.venv313\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
-`\.venv313\Scripts\python.exe -m app.seed_skills` creates missing tables and inserts only missing
-starter skills; it does not delete or modify existing users, shifts, or skills.
-Swagger is available at `http://127.0.0.1:8000/docs` and health at
-`http://127.0.0.1:8000/health`.
+`app.seed_skills` creates missing tables and starter skills without modifying existing records. The API runs at `http://127.0.0.1:8000`; API docs are at `/docs`.
 
-## Vercel deployment
-
-Connect a persistent Postgres database (the Vercel Neon integration supplies
-`DATABASE_URL`) to the production project. Vercel functions cannot persist a
-local SQLite database. Set a long, fixed `JWT_SECRET` in the project's
-production environment variables. The FastAPI service creates missing tables
-and starter skills when it starts on Vercel. Redeploy after changing environment
-variables so the new values reach the functions. The frontend calls `/api/v1`
-on the same domain; `VITE_API_BASE_URL` may be omitted.
-
-For isolated backend tests (which use a temporary SQLite file and do not access
-the configured MySQL database):
+In another terminal, run the frontend from `frontend/`:
 
 ```powershell
+npm.cmd ci
+npm.cmd run dev
+```
+
+The frontend uses `http://127.0.0.1:8000` in development by default. To use a different backend, set `VITE_API_BASE_URL` to its origin (without `/api/v1`).
+
+## Vercel
+
+The root `vercel.json` deploys the Vite frontend and FastAPI backend on one domain. Connect a persistent Postgres database through Vercel Storage; the Neon integration supplies `DATABASE_URL`. Set a fixed `JWT_SECRET` for production. The backend creates missing tables and starter skills on startup. Local SQLite files are not suitable for persistent data on Vercel.
+
+## Checks
+
+```powershell
+cd backend
 .\.venv313\Scripts\python.exe -m pytest tests -q --basetemp .test-tmp -p no:cacheprovider
+cd ..\frontend
+npm.cmd run lint
+npm.cmd run build
 ```
 
