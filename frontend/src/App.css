@@ -38,3 +38,69 @@
 .home p { color: #567079; line-height: 1.6; }
 .home .button { margin-top: 20px; }
 @media (max-width: 780px) { .auth-grid { grid-template-columns: 1fr; max-width: 540px; margin: auto; } .page-shell { padding-top: 34px; } .intro h1 { margin: 12px 0; } .intro-decoration { display: none; } .nav-inner { gap: 12px; align-items: flex-start; flex-direction: column; } .nav-links { margin-left: -10px; } }
+
+.screen { display: grid; gap: 26px; }
+.narrow-screen { max-width: 800px; margin: auto; }
+.screen-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
+.screen-heading h1 { font-size: clamp(2rem, 4vw, 2.7rem); letter-spacing: -.035em; margin: 7px 0; }
+.screen-heading p, .panel p { color: #567079; line-height: 1.55; margin: 0; }
+.panel, .filter-panel, .shift-card, .applicant-card, .application-card, .data-state { background: white; border: 1px solid #c5d5d6; border-radius: 10px; padding: 22px; }
+.filter-panel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 14px; align-items: end; }
+.field select { width: 100%; min-height: 46px; border: 1px solid #b8ccce; border-radius: 7px; background: white; padding: 10px 13px; color: #17313a; font-weight: 400; }
+.filter-panel .button { white-space: nowrap; }
+.card-list { display: grid; gap: 14px; }
+.shift-card { display: flex; justify-content: space-between; align-items: center; gap: 22px; }
+.shift-card-main { flex: 1; min-width: 0; }
+.shift-card-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.shift-card h2, .application-card h2 { font-size: 1.2rem; margin: 0; }
+.shift-card p, .application-card p, .applicant-card p { color: #567079; margin: 5px 0 0; font-size: .88rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 14px 25px; margin: 19px 0 0; }
+.facts div { min-width: 105px; }
+.facts dt { color: #789096; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 800; }
+.facts dd { margin: 5px 0 0; font-size: .88rem; font-weight: 700; }
+.shift-actions, .form-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.shift-actions { justify-content: flex-end; }
+.shift-actions .button { min-height: 39px; padding: 7px 11px; font-size: .82rem; }
+.chip { display: inline-flex; border-radius: 100px; padding: 5px 10px; background: #ddf4f1; color: #0f4c5c; font-size: .7rem; letter-spacing: .04em; font-weight: 850; }
+.chip-pending { background: #fff2d6; color: #7c5100; }
+.chip-rejected, .chip-cancelled { background: #fae2e3; color: #922e39; }
+.chip-accepted, .chip-open { background: #ddf4f1; color: #0f4c5c; }
+.chip-filled, .chip-completed { background: #e5ebf4; color: #314c70; }
+.data-state { color: #567079; }
+.data-state .status { margin-bottom: 12px; }
+.skill-panel { display: grid; grid-template-columns: 1fr auto; gap: 15px 25px; align-items: end; }
+.skill-panel h2, .detail-action h2, .applicants-section h2 { margin: 0 0 6px; font-size: 1.2rem; }
+.skill-panel p + p { margin-top: 10px; color: #17313a; font-weight: 700; }
+.skill-controls { display: flex; align-items: end; gap: 10px; }
+.skill-controls .field { min-width: 220px; }
+.skill-panel .status { grid-column: 1 / -1; margin: 0; }
+.shift-form { margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.shift-form .field:first-child, .shift-form .status, .shift-form .form-actions { grid-column: 1 / -1; }
+.text-button { color: #087f79; border: 0; background: transparent; padding: 0; text-decoration: underline; font-weight: 750; cursor: pointer; }
+.detail-action { display: grid; justify-items: start; gap: 14px; }
+.applicants-section { display: grid; gap: 14px; }
+.applicant-card, .application-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.applicant-card h3 { margin: 0; font-size: 1rem; }
+.application-card > div { flex: 1; }
+@media (max-width: 960px) { .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filter-panel .button { align-self: end; } .shift-card { align-items: flex-start; flex-direction: column; } .shift-actions { justify-content: flex-start; } }
+@media (max-width: 600px) { .screen-heading { align-items: flex-start; flex-direction: column; } .filter-panel, .shift-form, .skill-panel { grid-template-columns: 1fr; } .shift-form .field:first-child, .shift-form .status, .shift-form .form-actions { grid-column: auto; } .skill-controls, .applicant-card, .application-card { align-items: stretch; flex-direction: column; } .skill-controls .field { min-width: 0; } .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-shell { padding-inline: 16px; } }
+.panel h2 { margin: 0 0 12px; }
+.inline-form, .availability-form, .report-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-top: 18px; }
+.inline-form .field, .availability-form .field, .report-filters .field { flex: 1 1 180px; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 9px; margin: 18px 0; }
+.skill-tag { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; background: #ddf4f1; border-radius: 99px; font-weight: 700; }
+.skill-tag button { border: 0; background: transparent; color: #0f4c5c; font-size: 1.2rem; }
+.availability-list { margin: 18px 0; }
+.availability-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #d6e2e3; }
+.report-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.report-tab { border: 1px solid #9bcfc9; background: white; color: #0f4c5c; border-radius: 7px; padding: 10px 15px; font-weight: 700; }
+.report-tab.active { background: #0f4c5c; color: white; }
+.import-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.import-summary div { display: grid; gap: 4px; padding: 15px; background: #e7f0ef; border-radius: 7px; }
+.import-summary strong { font-size: 1.6rem; }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: .88rem; }
+th, td { padding: 11px 13px; border-bottom: 1px solid #d6e2e3; vertical-align: top; white-space: nowrap; }
+td:last-child { white-space: normal; }
+th { color: #0f4c5c; background: #e7f0ef; }
+@media (max-width: 600px) { .availability-row { align-items: flex-start; flex-direction: column; } .import-summary { gap: 6px; } .import-summary div { padding: 10px; } .nav-links { gap: 2px; } .nav-link { padding: 7px 9px; } }
