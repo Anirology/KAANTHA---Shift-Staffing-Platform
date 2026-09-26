@@ -46,6 +46,11 @@ def main():
                 if name not in constraints:
                     connection.execute(text(f"DROP INDEX {quote(name)}"))
         else:
+            # MySQL requires an index for the foreign key. Add the replacement
+            # before dropping the unique index so the FK remains supported.
+            existing = {item["name"] for item in inspect(connection).get_indexes("businesses")}
+            if "ix_businesses_user_id" not in existing:
+                connection.execute(text("CREATE INDEX ix_businesses_user_id ON businesses (user_id)"))
             for name in set(constraints + indexes):
                 connection.execute(text(f"ALTER TABLE businesses DROP INDEX {quote(name)}"))
 
