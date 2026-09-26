@@ -7,3 +7,5 @@ frontend/dist/
 .env.*
 !**/.env.example
 backend/backups/
+**/.pytest_cache/
+**/.test-*/
