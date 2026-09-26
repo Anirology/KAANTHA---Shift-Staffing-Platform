@@ -15,14 +15,16 @@ export function BusinessAccounts({ businesses, activeBusinessId, onSelect, onAdd
     if (!businessName) { setError('Enter a business name.'); return }
     setBusy(true)
     setError('')
-    try { onAdd(await api.createBusiness(businessName)) }
+    try { onAdd(await api.createBusiness(businessName)); setName('') }
     catch (caught) { setError(caught.message) }
     finally { setBusy(false) }
   }
 
-  return <div className="screen narrow-screen">
-    <header className="screen-heading"><div><span className="intro-eyebrow">Business</span><h1>Your businesses</h1><p>One login can manage separate businesses. Choose which business you are working on.</p></div></header>
-    <section className="panel"><h2>Business profiles</h2><div className="business-list">{businesses.map((business) => <div className="business-row" key={business.id}><div><strong>{business.business_name}</strong><span>Business ID {business.id}</span></div>{business.id === activeBusinessId ? <span className="chip">Active</span> : <Button type="button" variant="secondary" onClick={() => onSelect(business.id)}>Switch</Button>}</div>)}</div></section>
-    <section className="panel"><h2>Add another business</h2><p>Shifts, applicants, imports, and reports stay with the selected business.</p><form className="inline-form" onSubmit={submit}><Field id="new-business-name" label="Business name" maxLength={150} value={name} onChange={(event) => setName(event.target.value)} required /><Button type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add business'}</Button></form>{error && <StatusMessage type="error">{error}</StatusMessage>}</section>
+  const activeBusiness = businesses.find((business) => business.id === activeBusinessId)
+
+  return <div className="screen business-accounts-screen">
+    <header className="business-accounts-hero"><div><span className="intro-eyebrow">Business workspace</span><h1>Choose your business</h1><p>Use one secure login to manage separate teams, shifts and reports.</p></div><div className="active-business-summary"><span>Currently managing</span><strong>{activeBusiness?.business_name || 'Select a business'}</strong><small>{businesses.length} {businesses.length === 1 ? 'business profile' : 'business profiles'}</small></div></header>
+    <section className="business-profile-panel" aria-labelledby="profiles-title"><div className="section-heading-row"><div><span className="intro-eyebrow">Your workspaces</span><h2 id="profiles-title">Business profiles</h2></div><p>Switching changes the shifts, applicants, imports and reports you see.</p></div><div className="business-profile-grid">{businesses.map((business) => { const active = business.id === activeBusinessId; return <article className={`business-profile-card ${active ? 'business-profile-card-active' : ''}`} key={business.id}><div className="business-avatar" aria-hidden="true">{business.business_name.trim().slice(0, 2).toUpperCase()}</div><div className="business-profile-copy"><strong>{business.business_name}</strong><span>Workspace #{business.id}</span></div>{active ? <span className="active-workspace-badge"><i /> Active workspace</span> : <Button type="button" variant="secondary" onClick={() => onSelect(business.id)}>Switch workspace</Button>}</article> })}</div></section>
+    <section className="add-business-panel"><div><span className="intro-eyebrow">Grow with Shiftly</span><h2>Add another business</h2><p>Create a separate workspace. Its shifts, applicants and reports will stay private from your other businesses.</p></div><form className="add-business-form" onSubmit={submit}><Field id="new-business-name" label="Business name" placeholder="e.g. Cicada Events" maxLength={150} value={name} onChange={(event) => setName(event.target.value)} required /><Button type="submit" disabled={busy || !name.trim()}>{busy ? 'Creating workspace…' : 'Add business'}</Button>{error && <StatusMessage type="error">{error}</StatusMessage>}</form></section>
   </div>
 }
