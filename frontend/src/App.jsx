@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, clearToken, getBusinessId, getToken, saveBusinessId, saveToken } from './services/api'
 import { Navigation } from './components/Navigation'
 import { PageLayout } from './components/PageLayout'
+import { PageGuide } from './components/PageGuide'
 import { StatusMessage } from './components/StatusMessage'
 import { Login } from './pages/Login'
 import { WorkerRegistration } from './pages/WorkerRegistration'
@@ -32,6 +33,23 @@ function routeFor(path) {
   match = path.match(/^\/business\/shifts\/(\d+)\/(edit|applicants)$/)
   if (match) return { path: match[2], role: 'BUSINESS', id: Number(match[1]) }
   return { path: '/', role: null }
+}
+
+function guideFor(route) {
+  const guides = {
+    '/worker': ['Browse shifts', 'Use the filters to narrow the list, then open a shift to check its requirements before applying.'],
+    '/worker/applications': ['My applications', 'PENDING means the business is reviewing it. ACCEPTED shifts are confirmed work.'],
+    '/worker/profile': ['Worker profile', 'Keep your skills and dated availability current so businesses can make informed decisions.'],
+    '/business': ['Manage shifts', 'Review staffing at a glance. Applicants is the fastest route to accepting workers and recording attendance.'],
+    '/business/accounts': ['Businesses', 'Create and switch business profiles here. Every shift and report stays with the selected business.'],
+    '/business/shifts/new': ['Create a shift', 'Add the required skill, time, capacity and payment. Workers will see the shift once it is open.'],
+    '/business/shifts/import': ['CSV import', 'Download or follow the required column format, then review the result summary for any rejected rows.'],
+    '/business/reports': ['Reports', 'Choose a report and optional date range, then download the same filtered information.'],
+    details: ['Shift details', 'Check the full shift information here before applying or making business changes.'],
+    edit: ['Edit shift', 'You can update active shifts, but accepted staffing and completed work remain protected.'],
+    applicants: ['Applicants', 'Accepting runs skill, overlap and capacity checks. Mark attendance before completing the shift.'],
+  }
+  return guides[route.path]
 }
 
 export default function App() {
@@ -113,6 +131,7 @@ export default function App() {
   }
 
   const route = routeFor(path)
+  const guide = account ? guideFor(route) : null
   let content
   if (checking) {
     content = <p role="status">Checking your session…</p>
@@ -152,6 +171,7 @@ export default function App() {
       <PageLayout navigation={<Navigation account={account} activeBusinessId={activeBusinessId} onSelectBusiness={selectBusiness} activePath={path} onNavigate={navigate} onLogout={logout} />}>
       {sessionError && <StatusMessage type="error">{sessionError}</StatusMessage>}
       {content}
+      {guide && <PageGuide key={route.path} guideKey={route.path} title={guide[0]}>{guide[1]}</PageGuide>}
     </PageLayout>
   )
 }
