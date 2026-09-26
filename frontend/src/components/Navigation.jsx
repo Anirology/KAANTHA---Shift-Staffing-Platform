@@ -3,8 +3,8 @@ export function Navigation({ account, activeBusinessId, onSelectBusiness, active
     ? [{ path: '/worker', label: 'Browse shifts' }, { path: '/worker/applications', label: 'My applications' }, { path: '/worker/profile', label: 'My profile' }]
     : account?.role === 'BUSINESS'
       ? [{ path: '/business', label: 'Manage shifts' }, { path: '/business/shifts/new', label: 'Create shift' }, { path: '/business/shifts/import', label: 'CSV import' }, { path: '/business/reports', label: 'Reports' }, { path: '/business/accounts', label: 'Businesses' }]
-      : [{ path: '/login', label: 'Log in' }, { path: '/register/worker', label: 'Join as worker' }, { path: '/register/business', label: 'Register business' }]
-  const home = account?.role === 'WORKER' ? '/worker' : account?.role === 'BUSINESS' ? '/business' : '/login'
+      : [{ path: '/', label: 'Home' }, { path: '/login', label: 'Log in' }, { path: '/register/worker', label: 'Join as worker' }, { path: '/register/business', label: 'For businesses' }]
+  const home = account?.role === 'WORKER' ? '/worker' : account?.role === 'BUSINESS' ? '/business' : '/'
 
   return (
     <header className="site-header">

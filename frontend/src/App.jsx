@@ -16,21 +16,22 @@ import { WorkerProfile } from './pages/WorkerProfile'
 import { ImportShifts } from './pages/ImportShifts'
 import { Reports } from './pages/Reports'
 import { BusinessAccounts } from './pages/BusinessAccounts'
+import { Landing } from './pages/Landing'
 import './App.css'
 
 function currentPath() {
-  return window.location.hash.slice(1) || '/login'
+  return window.location.hash.slice(1) || '/'
 }
 
 function routeFor(path) {
-  if (['/login', '/register/worker', '/register/business'].includes(path)) return { path, role: null }
+  if (['/', '/login', '/register/worker', '/register/business'].includes(path)) return { path, role: null }
   if (['/worker', '/worker/applications', '/worker/profile'].includes(path)) return { path, role: 'WORKER' }
   if (['/business', '/business/accounts', '/business/shifts/new', '/business/shifts/import', '/business/reports'].includes(path)) return { path, role: 'BUSINESS' }
   let match = path.match(/^\/(worker|business)\/shifts\/(\d+)$/)
   if (match) return { path: 'details', role: match[1].toUpperCase(), id: Number(match[2]) }
   match = path.match(/^\/business\/shifts\/(\d+)\/(edit|applicants)$/)
   if (match) return { path: match[2], role: 'BUSINESS', id: Number(match[1]) }
-  return { path: '/login', role: null }
+  return { path: '/', role: null }
 }
 
 export default function App() {
@@ -137,6 +138,8 @@ export default function App() {
     content = <ShiftDetails key={`${route.role}-${activeBusinessId}-${route.id}`} shiftId={route.id} accountRole={route.role} onNavigate={navigate} />
   } else if (route.path === 'applicants') {
     content = <Applicants key={`${activeBusinessId}-${route.id}`} shiftId={route.id} onNavigate={navigate} />
+  } else if (route.path === '/') {
+    content = <Landing onNavigate={navigate} />
   } else if (route.path === '/register/worker') {
     content = <WorkerRegistration onNavigate={navigate} />
   } else if (route.path === '/register/business') {
