@@ -148,6 +148,13 @@ def test_csv_import_reports_valid_and_invalid_rows(api):
     assert response.json()["failed"] == 1
     assert response.json()["errors"]
 
+    skill_csv = "skill_name,description\nCashier,Duplicate\nWaiter,Serves customers\n,Missing name\n"
+    skills = client.post("/api/v1/skills/import", headers=business, files={"file": ("skills.csv", skill_csv, "text/csv")})
+    assert skills.status_code == 200
+    assert skills.json() == {"total": 3, "created": 1, "duplicates": 1, "failed": 1, "errors": [{"row": 4, "field": "skill_name", "message": "Skill name is required."}]}
+    worker = register_worker(client)
+    assert client.post("/api/v1/skills/import", headers=worker, files={"file": ("skills.csv", skill_csv, "text/csv")}).status_code == 403
+
 
 def test_one_login_can_manage_two_businesses_without_cross_business_access(api):
     client, sessions = api

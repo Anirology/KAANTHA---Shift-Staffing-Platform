@@ -29,6 +29,7 @@ app.include_router(businesses.router, prefix="/api/v1")
 app.include_router(workers.router, prefix="/api/v1")
 app.include_router(shifts.router, prefix="/api/v1")
 app.include_router(imports.router, prefix="/api/v1")
+app.include_router(imports.skill_router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
 app.include_router(ratings.router, prefix="/api/v1")
 

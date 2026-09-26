@@ -205,6 +205,14 @@ class ImportResponse(BaseModel):
     errors: list[ImportErrorResponse]
 
 
+class SkillImportResponse(BaseModel):
+    total: int
+    created: int
+    duplicates: int
+    failed: int
+    errors: list[ImportErrorResponse]
+
+
 class DateFilter(BaseModel):
     from_date: DateType | None = None
     to_date: DateType | None = None

@@ -107,6 +107,7 @@ export const api = {
   rateWorker: (shiftId, workerId, fields) => request(`/shifts/${shiftId}/workers/${workerId}/rating`, { method: 'POST', body: fields, protectedRequest: true }),
   myRatings: () => request('/workers/me/ratings', { protectedRequest: true }),
   importShifts: (file) => { const form = new FormData(); form.append('file', file); return request('/shifts/import', { method: 'POST', body: form, protectedRequest: true }) },
+  importSkills: (file) => { const form = new FormData(); form.append('file', file); return request('/skills/import', { method: 'POST', body: form, protectedRequest: true }) },
   report: (kind, filters) => request(`/reports/${kind}${queryString(filters)}`, { protectedRequest: true }),
   exportReport: (kind, filters, format = 'csv') => request(`/reports/${kind}/export${format === 'pdf' ? '/pdf' : ''}${queryString(filters)}`, { protectedRequest: true, responseType: 'blob', accept: format === 'pdf' ? 'application/pdf' : 'text/csv' }),
 }

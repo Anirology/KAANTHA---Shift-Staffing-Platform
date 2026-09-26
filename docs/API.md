@@ -396,7 +396,27 @@ The frontend calls the API through one service file. Local `VITE\_API\_BASE\_URL
 
 
 
-Advanced analytics and skill-catalogue import have no v1 frontend endpoint contract. Define and announce their contracts before building those bonus screens.
+Advanced analytics has no separate v1 endpoint; the current dashboard derives its cards from the business shift response.
+
+## Skill catalogue CSV import
+
+`POST /skills/import` is BUSINESS-only and accepts `multipart/form-data` with a `file` field. Required UTF-8 CSV headers are `skill_name,description`. Names are trimmed and compared case-insensitively against existing skills and earlier rows in the same file. Valid new skills are created; duplicates are counted without changing the existing catalogue; invalid rows are reported.
+
+Response: `{total:int, created:int, duplicates:int, failed:int, errors:[{row,field,message}]}`.
+
+## SHARED CONTRACT CHANGE - skill catalogue CSV import (2026-09-27)
+
+OLD: Only shift CSV import existed; the skill catalogue was seeded or changed directly in the backend.
+
+NEW: BUSINESS accounts can upload the shared skill catalogue through `POST /skills/import` using `skill_name,description`.
+
+BACKEND IMPACT: Adds validated UTF-8 CSV parsing, trimming, case-insensitive duplicate detection, a 2 MB limit, and an import summary.
+
+FRONTEND IMPACT: The CSV Import page now has separate Shift and Skill Catalogue upload panels.
+
+DATABASE IMPACT: Adds valid rows to the existing `skills` table only. No schema change.
+
+DOCUMENTATION IMPACT: CSV templates and demonstrations must distinguish shift import from skill import.
 
 ## Ratings
 
