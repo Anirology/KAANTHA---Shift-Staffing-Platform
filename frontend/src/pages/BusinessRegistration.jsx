@@ -31,7 +31,7 @@ export function BusinessRegistration({ onNavigate }) {
   }
 
   return (
-    <AuthLayout eyebrow="For businesses" title="Build your shift team." description="Create a business account to prepare for managing temporary staffing with KAANTHA.">
+    <AuthLayout eyebrow="For businesses" title="Build your shift team." description="Create a business account to prepare for managing temporary staffing with Shiftly.">
       <section className="auth-card" aria-labelledby="business-title">
         <h2 id="business-title">Business registration</h2>
         <p>Enter your business details to get started.</p>

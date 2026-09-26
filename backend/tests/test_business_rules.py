@@ -138,3 +138,39 @@ def test_csv_import_reports_valid_and_invalid_rows(api):
     assert response.json()["created"] == 1
     assert response.json()["failed"] == 1
     assert response.json()["errors"]
+
+
+def test_one_login_can_manage_two_businesses_without_cross_business_access(api):
+    client, sessions = api
+    owner = register_business(client, "First Business")
+    other = register_business(client, "Other Owner")
+    worker = register_worker(client)
+    skill = skill_id(sessions)
+
+    first = client.get("/api/v1/businesses/me", headers=owner).json()[0]
+    created = client.post("/api/v1/businesses", headers=owner, json={"business_name": "Second Business"})
+    assert created.status_code == 201
+    second = created.json()
+    assert second["id"] != first["id"]
+    assert [item["id"] for item in client.get("/api/v1/auth/me", headers=owner).json()["businesses"]] == [first["id"], second["id"]]
+    assert client.get("/api/v1/businesses/me", headers=worker).status_code == 403
+    assert client.post("/api/v1/businesses", headers=worker, json={"business_name": "Fake"}).status_code == 403
+
+    assert client.get("/api/v1/businesses/me/shifts", headers=owner).status_code == 400
+    first_headers = {**owner, "X-Business-Id": str(first["id"])}
+    second_headers = {**owner, "X-Business-Id": str(second["id"])}
+    first_shift = create_shift(client, first_headers, skill)
+    second_shift = create_shift(client, second_headers, skill, start="13:00:00", end="15:00:00")
+    assert [item["id"] for item in client.get("/api/v1/businesses/me/shifts", headers=first_headers).json()] == [first_shift]
+    assert [item["id"] for item in client.get("/api/v1/businesses/me/shifts", headers=second_headers).json()] == [second_shift]
+    assert client.get(f"/api/v1/shifts/{first_shift}", headers=second_headers).status_code == 404
+    assert client.patch(f"/api/v1/shifts/{first_shift}", headers=second_headers, json={"role": "Changed"}).status_code == 403
+    assert client.get("/api/v1/reports/staffing", headers=second_headers).json()[0]["shift_id"] == second_shift
+    assert client.get("/api/v1/businesses/me/shifts", headers={**other, "X-Business-Id": str(first["id"])}).status_code == 403
+
+    assert client.post("/api/v1/workers/me/skills", headers=worker, json={"skill_id": skill}).status_code == 201
+    application = apply(client, worker, first_shift)
+    assert client.patch(f"/api/v1/applications/{application}/accept", headers=second_headers).status_code == 403
+    assert client.patch(f"/api/v1/applications/{application}/accept", headers=worker).status_code == 403
+    assert client.get("/api/v1/workers/me/applications", headers=worker).json()[0]["status"] == "PENDING"
+    assert client.patch(f"/api/v1/applications/{application}/accept", headers=first_headers).status_code == 200

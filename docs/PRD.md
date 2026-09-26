@@ -1,4 +1,4 @@
-\# KAANTHA — Product Requirements Document
+\# Shiftly — Product Requirements Document
 
 
 
@@ -12,7 +12,7 @@
 
 
 
-Businesses need a simple way to fill temporary work shifts. Workers need to find suitable shifts and track their applications. KAANTHA connects them and prevents invalid staffing confirmations.
+Businesses need a simple way to fill temporary work shifts. Workers need to find suitable shifts and track their applications. Shiftly connects them and prevents invalid staffing confirmations.
 
 
 

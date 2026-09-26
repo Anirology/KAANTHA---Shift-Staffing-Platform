@@ -1,12 +1,12 @@
 from datetime import date
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
-from app.dependencies import get_business, get_current_user, get_worker
+from app.dependencies import get_business, get_current_user, get_worker, resolve_business
 from app.models import Application, ApplicationStatus, Attendance, AttendanceStatus, Business, Shift, ShiftStatus, Skill, User, Worker
 from app.schemas.schemas import ApplicationResponse, AttendanceRequest, RejectionRequest, ShiftBase, ShiftPatch, ShiftResponse
 from app.routers.workers import application_response
@@ -41,11 +41,13 @@ def list_shifts(role: str | None = None, skill_id: int | None = None, date: date
 
 
 @router.get("/shifts/{shift_id}", response_model=ShiftResponse)
-def get_shift(shift_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_shift(shift_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db), business_id: int | None = Header(default=None, alias="X-Business-Id")):
     shift = db.scalar(select(Shift).options(joinedload(Shift.business), joinedload(Shift.required_skill)).where(Shift.id == shift_id))
     if not shift: raise HTTPException(404, "Shift not found.")
-    if user.role == "BUSINESS" and (not user.business or shift.business_id != user.business.id):
-        raise HTTPException(404, "Shift not found.")
+    if user.role == "BUSINESS":
+        business = resolve_business(user, business_id, db)
+        if shift.business_id != business.id:
+            raise HTTPException(404, "Shift not found.")
     if user.role == "WORKER" and shift.status != ShiftStatus.OPEN.value:
         has_applied = user.worker and db.scalar(select(Application.id).where(Application.shift_id == shift.id, Application.worker_id == user.worker.id))
         if not has_applied:

@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str = "sqlite:///./kaantha.db"
+    database_url: str = "sqlite:///./shiftly.db"
     jwt_secret: str = secrets.token_urlsafe(32)
     jwt_algorithm: str = "HS256"
     access_token_minutes: int = 60

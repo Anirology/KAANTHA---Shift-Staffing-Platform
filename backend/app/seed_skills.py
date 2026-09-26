@@ -1,4 +1,4 @@
-"""Create the KAANTHA schema and add missing starter skills without deleting data."""
+"""Create the Shiftly schema and add missing starter skills without deleting data."""
 
 from sqlalchemy import select
 

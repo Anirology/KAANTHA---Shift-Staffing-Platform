@@ -1,7 +1,8 @@
 const configuredOrigin = import.meta.env.VITE_API_BASE_URL
 const origin = (configuredOrigin || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : window.location.origin)).replace(/\/+$/, '')
 const baseUrl = `${origin}/api/v1`
-const tokenKey = 'kaantha_access_token'
+const tokenKey = 'shiftly_access_token'
+const businessKey = 'shiftly_business_id'
 
 function validOrigin(value) {
   try {
@@ -27,14 +28,24 @@ export function getToken() {
 
 export function saveToken(token) {
   sessionStorage.setItem(tokenKey, token)
+  sessionStorage.removeItem(businessKey)
 }
 
 export function clearToken() {
   sessionStorage.removeItem(tokenKey)
+  sessionStorage.removeItem(businessKey)
+}
+
+export function getBusinessId() {
+  return Number(sessionStorage.getItem(businessKey)) || null
+}
+
+export function saveBusinessId(id) {
+  sessionStorage.setItem(businessKey, String(id))
 }
 
 async function request(path, { method = 'GET', body, protectedRequest = false, token, responseType = 'json' } = {}) {
-  if (!validOrigin(origin) || (import.meta.env.PROD && !origin.startsWith('https://'))) throw new Error('The KAANTHA API origin is invalid.')
+  if (!validOrigin(origin) || (import.meta.env.PROD && !origin.startsWith('https://'))) throw new Error('The Shiftly API origin is invalid.')
   const bearer = token || (protectedRequest ? getToken() : null)
   let response
   try {
@@ -44,16 +55,17 @@ async function request(path, { method = 'GET', body, protectedRequest = false, t
         Accept: responseType === 'blob' ? 'text/csv' : 'application/json',
         ...(body && !(body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
         ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
+        ...(protectedRequest && getBusinessId() ? { 'X-Business-Id': String(getBusinessId()) } : {}),
       },
       ...(body ? { body: body instanceof FormData ? body : JSON.stringify(body) } : {}),
     })
   } catch {
-    throw new Error('Cannot connect to the KAANTHA server. Check your connection and try again.')
+    throw new Error('Cannot connect to the Shiftly server. Check your connection and try again.')
   }
 
   if (response.status === 401 && protectedRequest) {
     clearToken()
-    window.dispatchEvent(new Event('kaantha:session-expired'))
+    window.dispatchEvent(new Event('shiftly:session-expired'))
   }
   const data = response.ok && responseType === 'blob' ? await response.blob() : await response.json().catch(() => null)
   if (!response.ok) {
@@ -67,6 +79,8 @@ export const api = {
   registerBusiness: ({ email, password, business_name }) => request('/auth/register/business', { method: 'POST', body: { email, password, business_name } }),
   login: ({ email, password }) => request('/auth/login', { method: 'POST', body: { email, password } }),
   me: (token) => request('/auth/me', { protectedRequest: true, token }),
+  myBusinesses: () => request('/businesses/me', { protectedRequest: true }),
+  createBusiness: (business_name) => request('/businesses', { method: 'POST', body: { business_name }, protectedRequest: true }),
   skills: () => request('/skills', { protectedRequest: true }),
   workerProfile: () => request('/workers/me', { protectedRequest: true }),
   updateWorkerProfile: (fields) => request('/workers/me', { method: 'PATCH', body: fields, protectedRequest: true }),

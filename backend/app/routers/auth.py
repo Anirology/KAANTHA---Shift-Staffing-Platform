@@ -43,4 +43,5 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=MeResponse)
 def me(user: User = Depends(get_current_user)):
-    return MeResponse(id=user.id, email=user.email, role=user.role, worker_id=user.worker.id if user.worker else None, business_id=user.business.id if user.business else None)
+    businesses = sorted(user.businesses, key=lambda item: item.id)
+    return MeResponse(id=user.id, email=user.email, role=user.role, worker_id=user.worker.id if user.worker else None, business_id=businesses[0].id if businesses else None, businesses=businesses)

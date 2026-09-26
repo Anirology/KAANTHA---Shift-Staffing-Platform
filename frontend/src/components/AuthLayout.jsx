@@ -1,7 +1,7 @@
 export function AuthLayout({ eyebrow, title, description, children }) {
   return (
     <div className="auth-grid">
-      <section className="intro" aria-label="About KAANTHA">
+      <section className="intro" aria-label="About Shiftly">
         <div className="intro-eyebrow">{eyebrow}</div>
         <h1>{title}</h1>
         <p>{description}</p>

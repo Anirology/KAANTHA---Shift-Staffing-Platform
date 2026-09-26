@@ -31,7 +31,7 @@ export function WorkerRegistration({ onNavigate }) {
   }
 
   return (
-    <AuthLayout eyebrow="For workers" title="Find your next opportunity." description="Create a worker account to get ready for temporary shifts with KAANTHA.">
+    <AuthLayout eyebrow="For workers" title="Find your next opportunity." description="Create a worker account to get ready for temporary shifts with Shiftly.">
       <section className="auth-card" aria-labelledby="worker-title">
         <h2 id="worker-title">Worker registration</h2>
         <p>Tell us how to reach you.</p>

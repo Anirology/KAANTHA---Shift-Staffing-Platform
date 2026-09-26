@@ -1,4 +1,4 @@
-\# KAANTHA — Database Design
+\# Shiftly — Database Design
 
 
 
@@ -24,7 +24,7 @@ Unless marked nullable, fields are required.
 
 | `workers` | `id` INT PK; `user\_id` INT FK UNIQUE; `name` VARCHAR(100) |
 
-| `businesses` | `id` INT PK; `user\_id` INT FK UNIQUE; `business\_name` VARCHAR(150) |
+| `businesses` | `id` INT PK; `user\_id` INT FK indexed (not unique); `business\_name` VARCHAR(150) |
 
 | `skills` | `id` INT PK; `name` VARCHAR(100) UNIQUE; `description` TEXT nullable |
 
@@ -48,7 +48,7 @@ Unless marked nullable, fields are required.
 
 
 
-\- One `users` record has one role-specific profile: either `workers` or `businesses`.
+\- One `users` record has either one worker profile or one or more business profiles, according to its role.
 
 \- One business posts many shifts.
 
@@ -76,7 +76,7 @@ erDiagram
 
 &#x20;   USERS ||--o| WORKERS : has
 
-&#x20;   USERS ||--o| BUSINESSES : has
+&#x20;   USERS ||--o{ BUSINESSES : owns
 
 &#x20;   BUSINESSES ||--o{ SHIFTS : posts
 

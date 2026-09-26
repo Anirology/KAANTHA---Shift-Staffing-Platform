@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, clearToken, getToken, saveToken } from './services/api'
+import { api, clearToken, getBusinessId, getToken, saveBusinessId, saveToken } from './services/api'
 import { Navigation } from './components/Navigation'
 import { PageLayout } from './components/PageLayout'
 import { StatusMessage } from './components/StatusMessage'
@@ -15,6 +15,7 @@ import { MyApplications } from './pages/MyApplications'
 import { WorkerProfile } from './pages/WorkerProfile'
 import { ImportShifts } from './pages/ImportShifts'
 import { Reports } from './pages/Reports'
+import { BusinessAccounts } from './pages/BusinessAccounts'
 import './App.css'
 
 function currentPath() {
@@ -24,7 +25,7 @@ function currentPath() {
 function routeFor(path) {
   if (['/login', '/register/worker', '/register/business'].includes(path)) return { path, role: null }
   if (['/worker', '/worker/applications', '/worker/profile'].includes(path)) return { path, role: 'WORKER' }
-  if (['/business', '/business/shifts/new', '/business/shifts/import', '/business/reports'].includes(path)) return { path, role: 'BUSINESS' }
+  if (['/business', '/business/accounts', '/business/shifts/new', '/business/shifts/import', '/business/reports'].includes(path)) return { path, role: 'BUSINESS' }
   let match = path.match(/^\/(worker|business)\/shifts\/(\d+)$/)
   if (match) return { path: 'details', role: match[1].toUpperCase(), id: Number(match[2]) }
   match = path.match(/^\/business\/shifts\/(\d+)\/(edit|applicants)$/)
@@ -35,6 +36,7 @@ function routeFor(path) {
 export default function App() {
   const [path, setPath] = useState(currentPath)
   const [account, setAccount] = useState(null)
+  const [activeBusinessId, setActiveBusinessId] = useState(getBusinessId())
   const [checking, setChecking] = useState(Boolean(getToken()))
   const [sessionError, setSessionError] = useState('')
 
@@ -42,14 +44,15 @@ export default function App() {
     const onHashChange = () => setPath(currentPath())
     const onExpired = () => {
       setAccount(null)
+      setActiveBusinessId(null)
       setSessionError('Your session has expired. Please log in again.')
       window.location.hash = '/login'
     }
     window.addEventListener('hashchange', onHashChange)
-    window.addEventListener('kaantha:session-expired', onExpired)
+    window.addEventListener('shiftly:session-expired', onExpired)
     return () => {
       window.removeEventListener('hashchange', onHashChange)
-      window.removeEventListener('kaantha:session-expired', onExpired)
+      window.removeEventListener('shiftly:session-expired', onExpired)
     }
   }, [])
 
@@ -61,6 +64,10 @@ export default function App() {
         if (!active) return
         if (!['WORKER', 'BUSINESS'].includes(user.role)) throw new Error('This account has an unsupported role.')
         setAccount(user)
+        if (user.role === 'BUSINESS') {
+          const chosen = user.businesses.find((business) => business.id === getBusinessId())?.id || user.businesses[0]?.id
+          if (chosen) { saveBusinessId(chosen); setActiveBusinessId(chosen) }
+        }
       })
       .catch((error) => { if (active) setSessionError(error.message) })
       .finally(() => { if (active) setChecking(false) })
@@ -76,12 +83,31 @@ export default function App() {
   function onLogin(result, user) {
     saveToken(result.access_token)
     setAccount(user)
+    if (user.role === 'BUSINESS' && user.businesses.length) {
+      saveBusinessId(user.businesses[0].id)
+      setActiveBusinessId(user.businesses[0].id)
+    }
     navigate(user.role === 'WORKER' ? '/worker' : '/business')
+  }
+
+  function selectBusiness(id) {
+    if (!account?.businesses.some((business) => business.id === id)) return
+    saveBusinessId(id)
+    setActiveBusinessId(id)
+    navigate('/business')
+  }
+
+  function addBusiness(business) {
+    setAccount((current) => ({ ...current, businesses: [...current.businesses, business] }))
+    saveBusinessId(business.id)
+    setActiveBusinessId(business.id)
+    navigate('/business')
   }
 
   function logout() {
     clearToken()
     setAccount(null)
+    setActiveBusinessId(null)
     navigate('/login')
   }
 
@@ -98,17 +124,19 @@ export default function App() {
   } else if (route.path === '/worker/profile') {
     content = <WorkerProfile />
   } else if (route.path === '/business') {
-    content = <ManageShifts onNavigate={navigate} />
+    content = <ManageShifts key={activeBusinessId} onNavigate={navigate} />
+  } else if (route.path === '/business/accounts') {
+    content = <BusinessAccounts businesses={account.businesses} activeBusinessId={activeBusinessId} onSelect={selectBusiness} onAdd={addBusiness} />
   } else if (route.path === '/business/shifts/import') {
-    content = <ImportShifts />
+    content = <ImportShifts key={activeBusinessId} />
   } else if (route.path === '/business/reports') {
-    content = <Reports />
+    content = <Reports key={activeBusinessId} />
   } else if (route.path === '/business/shifts/new' || route.path === 'edit') {
-    content = <ShiftForm key={route.id || 'new'} shiftId={route.id} onNavigate={navigate} />
+    content = <ShiftForm key={`${activeBusinessId}-${route.id || 'new'}`} shiftId={route.id} onNavigate={navigate} />
   } else if (route.path === 'details') {
-    content = <ShiftDetails key={`${route.role}-${route.id}`} shiftId={route.id} accountRole={route.role} onNavigate={navigate} />
+    content = <ShiftDetails key={`${route.role}-${activeBusinessId}-${route.id}`} shiftId={route.id} accountRole={route.role} onNavigate={navigate} />
   } else if (route.path === 'applicants') {
-    content = <Applicants key={route.id} shiftId={route.id} onNavigate={navigate} />
+    content = <Applicants key={`${activeBusinessId}-${route.id}`} shiftId={route.id} onNavigate={navigate} />
   } else if (route.path === '/register/worker') {
     content = <WorkerRegistration onNavigate={navigate} />
   } else if (route.path === '/register/business') {
@@ -118,7 +146,7 @@ export default function App() {
   }
 
   return (
-    <PageLayout navigation={<Navigation account={account} activePath={path} onNavigate={navigate} onLogout={logout} />}>
+      <PageLayout navigation={<Navigation account={account} activeBusinessId={activeBusinessId} onSelectBusiness={selectBusiness} activePath={path} onNavigate={navigate} onLogout={logout} />}>
       {sessionError && <StatusMessage type="error">{sessionError}</StatusMessage>}
       {content}
     </PageLayout>

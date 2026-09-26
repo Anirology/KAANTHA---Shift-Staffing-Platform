@@ -13,7 +13,7 @@ from app.main import app
 def api(tmp_path) -> Generator[tuple[TestClient, sessionmaker], None, None]:
     """Use a new SQLite file per test; never touch DATABASE_URL or MySQL data."""
     test_engine = create_engine(
-        f"sqlite:///{tmp_path / 'kaantha-test.db'}",
+        f"sqlite:///{tmp_path / 'shiftly-test.db'}",
         connect_args={"check_same_thread": False},
     )
     test_sessions = sessionmaker(bind=test_engine, autoflush=False, autocommit=False, expire_on_commit=False)

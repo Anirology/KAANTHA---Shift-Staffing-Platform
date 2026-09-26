@@ -36,7 +36,7 @@ export function Login({ onLogin, onNavigate }) {
   }
 
   return (
-    <AuthLayout eyebrow="Welcome to KAANTHA" title="A better way to connect for shifts." description="Sign in to your worker or business account to continue.">
+    <AuthLayout eyebrow="Welcome to Shiftly" title="A better way to connect for shifts." description="Sign in to your worker or business account to continue.">
       <section className="auth-card" aria-labelledby="login-title">
         <h2 id="login-title">Welcome back</h2>
         <p>Enter your details to sign in.</p>
@@ -47,7 +47,7 @@ export function Login({ onLogin, onNavigate }) {
           <Button type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Log in'}</Button>
         </form>
         <div className="form-footer">
-          <span>New to KAANTHA?</span>
+          <span>New to Shiftly?</span>
           <a href="#/register/worker" onClick={() => onNavigate('/register/worker')}>Register as a worker</a>
           <a href="#/register/business" onClick={() => onNavigate('/register/business')}>Register a business</a>
         </div>

@@ -33,7 +33,7 @@ export function ShiftDetails({ shiftId, accountRole, onNavigate }) {
   }
 
   return <div className="screen">
-    <header className="screen-heading"><div><span className="intro-eyebrow">{accountRole === 'WORKER' ? 'Worker' : 'Business'}</span><h1>Shift details</h1><p>Review the current details from KAANTHA.</p></div></header>
+    <header className="screen-heading"><div><span className="intro-eyebrow">{accountRole === 'WORKER' ? 'Worker' : 'Business'}</span><h1>Shift details</h1><p>Review the current details from Shiftly.</p></div></header>
     <DataState loading={loading} error={error} onRetry={retry} empty={!shift} emptyMessage="This shift is unavailable.">
       {shift && <><ShiftCard shift={shift} actions={accountRole === 'BUSINESS' ? <><Button type="button" onClick={() => onNavigate(`/business/shifts/${shiftId}/applicants`)}>View applicants</Button><Button type="button" variant="secondary" onClick={() => onNavigate(`/business/shifts/${shiftId}/edit`)} disabled={['CANCELLED', 'COMPLETED'].includes(shift.status)}>Edit shift</Button></> : null} />
       {accountRole === 'WORKER' && <section className="panel detail-action">

@@ -40,7 +40,7 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(20))
     worker: Mapped["Worker | None"] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
-    business: Mapped["Business | None"] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
+    businesses: Mapped[list["Business"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Worker(Base):
@@ -57,9 +57,9 @@ class Worker(Base):
 class Business(Base):
     __tablename__ = "businesses"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     business_name: Mapped[str] = mapped_column(String(150))
-    user: Mapped[User] = relationship(back_populates="business")
+    user: Mapped[User] = relationship(back_populates="businesses")
     shifts: Mapped[list["Shift"]] = relationship(back_populates="business")
 
 

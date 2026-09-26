@@ -1,4 +1,4 @@
-\# KAANTHA — API Contract v1
+\# Shiftly — API Contract v1
 
 
 
@@ -20,7 +20,7 @@ Ani owns backend contract decisions. Kajan implements frontend calls against thi
 
 
 
-\- Protected requests use `Authorization: Bearer <access\_token>`.
+\- Protected requests use `Authorization: Bearer <access\_token>`. Business-scoped requests also use `X-Business-Id` when the account owns multiple businesses.
 
 \- Account roles: `WORKER`, `BUSINESS`.
 
@@ -170,7 +170,11 @@ Ani owns backend contract decisions. Kajan implements frontend calls against thi
 
 | `POST /auth/login` | Public | `{email:string, password:string}` | `200 {access\_token:string, token\_type:"bearer", role:string, user\_id:int}` | `401` wrong credentials; `422` |
 
-| `GET /auth/me` | Either logged-in role | No body | `200 {id:int, email:string, role:string, worker\_id:int|null, business\_id:int|null}` | `401` |
+| `GET /auth/me` | Either logged-in role | No body | `200 {id:int, email:string, role:string, worker\_id:int|null, business\_id:int|null, businesses:Business[]}` | `401` |
+
+| `GET /businesses/me` | BUSINESS | No body | `200 [{id:int, business\_name:string}]` | `401`, `403` |
+
+| `POST /businesses` | BUSINESS | `{business\_name:string}` | `201 {id:int, business\_name:string}` | `401`, `403`, `422` |
 
 
 
@@ -385,4 +389,18 @@ The frontend calls the API through one service file. Local `VITE\_API\_BASE\_URL
 
 
 Ratings, advanced analytics, and skill-catalogue import have no v1 frontend endpoint contract. Define and announce their contracts before building those bonus screens.
+
+## SHARED CONTRACT CHANGE - multiple businesses per BUSINESS account (2026-09-26)
+
+OLD: A BUSINESS account owned exactly one `businesses` row. `GET /auth/me` returned a single `business_id`; business actions inferred that business automatically.
+
+NEW: A BUSINESS account may own multiple `businesses` rows. `GET /auth/me` retains `business_id` as the first business for compatibility and adds `businesses: [{"id": 1, "business_name": "Name"}]`. `GET /businesses/me` lists owned businesses. `POST /businesses` with `{"business_name": "Name"}` creates another business (`201`). For any business-scoped action, send `X-Business-Id: <id>`. If the account owns exactly one business, an omitted header still selects it; with multiple businesses, an omitted header returns `400`. A header naming a business owned by another user returns `403`. The authenticated user, not the header alone, determines ownership.
+
+BACKEND IMPACT: `get_business` validates the selected business for shift creation/management, applicant decisions, import, and reports. Workers still receive `403` on business-only endpoints. `GET /shifts/{id}` uses the selected business for a BUSINESS account.
+
+FRONTEND IMPACT: The navigation shows the active business and allows switching. The Businesses page creates another profile. The central API client sends `X-Business-Id` with protected requests. Switching returns to Manage Shifts so data refreshes under the chosen business.
+
+DATABASE IMPACT: `businesses.user_id` is a non-unique indexed foreign key. Existing MySQL or PostgreSQL databases must remove the old unique rule before a second business can be created; `create_all` alone does not migrate it. See `backend/migrations/allow_multiple_businesses.py` and back up before running it.
+
+DOCUMENTATION IMPACT: The database relationship is now USERS one-to-many BUSINESSES. Update examples, demo steps, and production migration notes together. The existing WORKER-versus-BUSINESS account roles remain unchanged.
 

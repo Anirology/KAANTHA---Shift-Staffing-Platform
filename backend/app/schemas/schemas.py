@@ -45,12 +45,31 @@ class LoginResponse(BaseModel):
     user_id: int
 
 
+class BusinessCreate(BaseModel):
+    business_name: str = Field(min_length=1, max_length=150)
+
+    @field_validator("business_name")
+    @classmethod
+    def nonblank_name(cls, value: str) -> str:
+        name = value.strip()
+        if not name:
+            raise ValueError("business_name cannot be blank")
+        return name
+
+
+class BusinessResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    business_name: str
+
+
 class MeResponse(BaseModel):
     id: int
     email: EmailStr
     role: UserRole
     worker_id: int | None
     business_id: int | None
+    businesses: list[BusinessResponse]
 
 
 class SkillResponse(BaseModel):

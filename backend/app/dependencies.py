@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -44,7 +44,18 @@ def get_worker(user: User = Depends(require_role(UserRole.WORKER)), db: Session 
     return user.worker
 
 
-def get_business(user: User = Depends(require_role(UserRole.BUSINESS)), db: Session = Depends(get_db)) -> Business:
-    if not user.business:
-        raise HTTPException(status_code=403, detail="Business profile not found.")
-    return user.business
+def resolve_business(user: User, business_id: int | None, db: Session) -> Business:
+    if user.role != UserRole.BUSINESS.value:
+        raise HTTPException(status_code=403, detail="Business account required.")
+    if business_id is None:
+        if len(user.businesses) == 1:
+            return user.businesses[0]
+        raise HTTPException(status_code=400, detail="Select a business using X-Business-Id.")
+    business = db.get(Business, business_id)
+    if business is None or business.user_id != user.id:
+        raise HTTPException(status_code=403, detail="You do not own this business.")
+    return business
+
+
+def get_business(user: User = Depends(require_role(UserRole.BUSINESS)), db: Session = Depends(get_db), business_id: int | None = Header(default=None, alias="X-Business-Id")) -> Business:
+    return resolve_business(user, business_id, db)

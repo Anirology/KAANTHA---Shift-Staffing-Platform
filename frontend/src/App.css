@@ -2,10 +2,14 @@
 .site-header { background: #0f4c5c; color: white; }
 .nav-inner { max-width: 1120px; margin: auto; min-height: 72px; padding: 12px 24px; display: flex; align-items: center; gap: 36px; }
 .brand { color: white; text-decoration: none; font-weight: 850; letter-spacing: .12em; font-size: 1.25rem; }
+.brand { display: inline-flex; align-items: center; gap: 10px; }
+.brand img { width: 34px; height: 34px; object-fit: contain; }
 .nav-links { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .nav-link { color: #e9f6f4; text-decoration: none; border: 1px solid transparent; border-radius: 7px; padding: 9px 12px; font-size: .9rem; font-weight: 600; background: transparent; }
 .nav-link:hover, .nav-link[aria-current="page"] { background: #1e6875; color: white; }
 .nav-button { border-color: #87c6c1; }
+.business-switcher { display: grid; gap: 3px; color: #e9f6f4; font-size: .72rem; font-weight: 700; }
+.business-switcher select { max-width: 205px; min-height: 35px; border: 1px solid #87c6c1; border-radius: 7px; background: #fff; color: #17313a; padding: 5px 8px; font: inherit; font-size: .85rem; }
 .page-shell { max-width: 1120px; margin: auto; padding: 56px 24px 72px; }
 .auth-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 450px); align-items: center; gap: clamp(32px, 7vw, 110px); }
 .intro-eyebrow { color: #0e8f88; font-weight: 800; text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; }
@@ -92,6 +96,10 @@
 .skill-tag button { border: 0; background: transparent; color: #0f4c5c; font-size: 1.2rem; }
 .availability-list { margin: 18px 0; }
 .availability-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #d6e2e3; }
+.business-list { display: grid; gap: 10px; margin-top: 16px; }
+.business-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; border: 1px solid #d6e2e3; border-radius: 7px; padding: 12px 14px; }
+.business-row div { display: grid; gap: 3px; }
+.business-row span:not(.chip) { color: #567079; font-size: .78rem; }
 .report-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
 .report-tab { border: 1px solid #9bcfc9; background: white; color: #0f4c5c; border-radius: 7px; padding: 10px 15px; font-weight: 700; }
 .report-tab.active { background: #0f4c5c; color: white; }
