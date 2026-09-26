@@ -32,7 +32,7 @@ Unless marked nullable, fields are required.
 
 | `worker\_availability` | `id` INT PK; `worker\_id` INT FK; `date` DATE; `start\_time` TIME; `end\_time` TIME |
 
-| `shifts` | `id` INT PK; `business\_id` INT FK; `role` VARCHAR(100); `date` DATE; `start\_time` TIME; `end\_time` TIME; `required\_workers` INT; `payment` DECIMAL(10,2); `required\_skill\_id` INT FK; `status` VARCHAR(20), default `OPEN` |
+| `shifts` | `id` INT PK; `business\_id` INT FK; `role` VARCHAR(100); `description` TEXT nullable; `date` DATE; `start\_time` TIME; `end\_time` TIME; `required\_workers` INT; `payment` DECIMAL(10,2); `required\_skill\_id` INT FK; `status` VARCHAR(20), default `OPEN` |
 
 | `applications` | `id` INT PK; `shift\_id` INT FK; `worker\_id` INT FK; `status` VARCHAR(20), default `PENDING`; `applied\_at` DATETIME; `rejection\_reason` VARCHAR(255) nullable; UNIQUE (`worker\_id`, `shift\_id`) |
 

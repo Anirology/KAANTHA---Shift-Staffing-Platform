@@ -96,6 +96,8 @@ Ani owns backend contract decisions. Kajan implements frontend calls against thi
 
 &#x20; "role": "Cashier",
 
+&#x20; "description": "Serve customers and arrive 15 minutes early.",
+
 &#x20; "date": "2026-09-28",
 
 &#x20; "start\_time": "15:00:00",
@@ -240,7 +242,7 @@ Availability is dated and shown in the UI. In v1, the mandatory acceptance block
 
 | `GET /businesses/me/shifts` | BUSINESS; own shifts | No body | `200 Shift\[]` | `401`, `403` |
 
-| `POST /shifts` | BUSINESS | `{role:string, date:string, start\_time:string, end\_time:string, required\_workers:int, payment:decimal string, required\_skill\_id:int}` | `201 Shift` | `401`, `403`, `404` skill missing, `422` |
+| `POST /shifts` | BUSINESS | `{role:string, description?:string|null, date:string, start\_time:string, end\_time:string, required\_workers:int, payment:decimal string, required\_skill\_id:int}` | `201 Shift` | `401`, `403`, `404` skill missing, `422` |
 
 | `PATCH /shifts/{shift\_id}` | Owning BUSINESS | Any editable fields from the POST body | `200 Shift` | `403` not owner; `404`; `409` invalid state/capacity; `422` |
 
@@ -249,6 +251,8 @@ Availability is dated and shown in the UI. In v1, the mandatory acceptance block
 
 
 The shift `role` means job title, such as “Cashier”; it is not the account role. `required\_workers` must be greater than zero, payment cannot be negative, and start time must precede end time. The v1 shift starts and ends on one date. `business\_id`, `status`, `accepted\_count`, and `remaining\_slots` are backend-controlled.
+
+`description` is optional plain text up to 1,000 characters. It holds responsibilities, dress code, arrival instructions, or other information workers should know. The same field can be changed through `PATCH /shifts/{shift_id}`.
 
 
 
@@ -419,6 +423,20 @@ FRONTEND IMPACT: The CSV Import page now has separate Shift and Skill Catalogue 
 DATABASE IMPACT: Adds valid rows to the existing `skills` table only. No schema change.
 
 DOCUMENTATION IMPACT: CSV templates and demonstrations must distinguish shift import from skill import.
+
+## SHARED CONTRACT CHANGE - shift details description (2026-09-27)
+
+OLD: A shift contained structured role, date, time, capacity, payment and required-skill fields only.
+
+NEW: Shift create, update and response objects include optional `description:string|null`, limited to 1,000 characters.
+
+BACKEND IMPACT: SQLAlchemy model, Pydantic schemas, response mapping and compatibility migration include `description`.
+
+FRONTEND IMPACT: Create/Edit Shift includes a Shift details textarea and the Shift Details page displays it.
+
+DATABASE IMPACT: Existing `shifts` tables receive a nullable `description TEXT` column. Existing rows remain valid with null descriptions.
+
+DOCUMENTATION IMPACT: API request/response examples, database schema and viva explanation include the new field.
 
 ## Ratings
 

@@ -25,6 +25,9 @@
 .field input { width: 100%; min-height: 46px; border: 1px solid #b8ccce; border-radius: 7px; padding: 10px 13px; color: #17313a; background: white; font-weight: 400; }
 .field input::placeholder { color: #789096; }
 .field input:focus { border-color: #0e8f88; }
+.field textarea { width: 100%; resize: vertical; border: 1px solid #b8ccce; border-radius: 7px; padding: 11px 13px; color: #17313a; background: white; font: inherit; font-weight: 400; line-height: 1.5; }
+.field textarea::placeholder { color: #789096; }
+.field textarea:focus { border-color: #0e8f88; outline: none; }
 .field-hint { color: #567079; font-size: .78rem; font-weight: 400; }
 .button { display: inline-flex; justify-content: center; align-items: center; min-height: 46px; border-radius: 7px; border: 1px solid #0e8f88; padding: 10px 18px; background: #0e8f88; color: white; font-weight: 750; text-decoration: none; }
 .button:hover { background: #087a74; }
@@ -128,8 +131,11 @@
 .skill-panel .status { grid-column: 1 / -1; margin: 0; }
 .shift-form { margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .shift-form .field:first-child, .shift-form .status, .shift-form .form-actions { grid-column: 1 / -1; }
+.shift-form .shift-description-field { grid-column: 1 / -1; }
 .text-button { color: #087f79; border: 0; background: transparent; padding: 0; text-decoration: underline; font-weight: 750; cursor: pointer; }
 .detail-action { display: grid; justify-items: start; gap: 14px; }
+.shift-description-panel h2 { margin: 7px 0 9px; }
+.shift-description-panel p { white-space: pre-wrap; }
 .applicants-section { display: grid; gap: 14px; }
 .section-heading-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .staffing-count { color: #0f4c5c; background: #ddf4f1; border-radius: 99px; padding: 7px 11px; font-size: .75rem; font-weight: 800; }
@@ -147,7 +153,7 @@
 .applicant-card h3 { margin: 0; font-size: 1rem; }
 .application-card > div { flex: 1; }
 @media (max-width: 960px) { .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filter-panel .button { align-self: end; } .shift-card { align-items: flex-start; flex-direction: column; } .shift-actions { justify-content: flex-start; } }
-@media (max-width: 600px) { .screen-heading { align-items: flex-start; flex-direction: column; } .filter-panel, .shift-form, .skill-panel { grid-template-columns: 1fr; } .shift-form .field:first-child, .shift-form .status, .shift-form .form-actions { grid-column: auto; } .skill-controls, .applicant-card, .application-card { align-items: stretch; flex-direction: column; } .skill-controls .field { min-width: 0; } .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-shell { padding-inline: 16px; } }
+@media (max-width: 600px) { .screen-heading { align-items: flex-start; flex-direction: column; } .filter-panel, .shift-form, .skill-panel { grid-template-columns: 1fr; } .shift-form .field:first-child, .shift-form .shift-description-field, .shift-form .status, .shift-form .form-actions { grid-column: auto; } .skill-controls, .applicant-card, .application-card { align-items: stretch; flex-direction: column; } .skill-controls .field { min-width: 0; } .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-shell { padding-inline: 16px; } }
 .panel h2 { margin: 0 0 12px; }
 .inline-form, .availability-form, .report-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-top: 18px; }
 .inline-form .field, .availability-form .field, .report-filters .field { flex: 1 1 180px; }

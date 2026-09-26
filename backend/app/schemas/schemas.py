@@ -123,6 +123,7 @@ class SkillLink(BaseModel):
 
 class ShiftBase(BaseModel):
     role: str = Field(min_length=1, max_length=100)
+    description: str | None = Field(default=None, max_length=1000)
     date: date
     start_time: time
     end_time: time
@@ -141,6 +142,7 @@ class ShiftBase(BaseModel):
 
 class ShiftPatch(BaseModel):
     role: str | None = Field(default=None, min_length=1, max_length=100)
+    description: str | None = Field(default=None, max_length=1000)
     date: DateType | None = None
     start_time: TimeType | None = None
     end_time: TimeType | None = None
@@ -154,6 +156,7 @@ class ShiftResponse(BaseModel):
     business_id: int
     business_name: str
     role: str
+    description: str | None
     date: date
     start_time: time
     end_time: time

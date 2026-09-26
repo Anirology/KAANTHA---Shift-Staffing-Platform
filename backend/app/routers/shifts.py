@@ -17,7 +17,7 @@ router = APIRouter(tags=["shifts", "applications"])
 
 def shift_response(shift: Shift, db: Session) -> ShiftResponse:
     accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0
-    return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, role=shift.role, date=shift.date, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
+    return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, role=shift.role, description=shift.description, date=shift.date, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
 
 
 def owned_application(application_id: int, business: Business, db: Session) -> Application:

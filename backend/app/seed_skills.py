@@ -5,6 +5,7 @@ from sqlalchemy import select
 from app.database import Base, SessionLocal, engine
 from app.models import Skill
 from migrations.allow_multiple_businesses import apply_migration as allow_multiple_businesses
+from migrations.add_shift_description import apply_migration as add_shift_description
 
 STARTER_SKILLS = (
     ("Cashier", "Handles checkout and customer payments."),
@@ -19,6 +20,7 @@ STARTER_SKILLS = (
 def seed() -> int:
     with engine.begin() as connection:
         allow_multiple_businesses(connection)
+        add_shift_description(connection)
     Base.metadata.create_all(bind=engine)
     created = 0
     with SessionLocal() as db:

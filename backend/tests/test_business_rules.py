@@ -59,6 +59,10 @@ def test_full_vertical_slice_reports_and_completion(api):
     assert client.patch(f"/api/v1/workers/me/availability/{availability.json()['id']}", headers=worker, json={"end_time": "14:00:00"}).status_code == 200
 
     shift_id = create_shift(client, business, skill)
+    updated = client.patch(f"/api/v1/shifts/{shift_id}", headers=business, json={"description": "Serve customers and arrive 15 minutes early."})
+    assert updated.status_code == 200
+    assert updated.json()["description"] == "Serve customers and arrive 15 minutes early."
+    assert client.get(f"/api/v1/shifts/{shift_id}", headers=business).json()["description"] == "Serve customers and arrive 15 minutes early."
     application_id = apply(client, worker, shift_id)
     assert client.post(f"/api/v1/shifts/{shift_id}/applications", headers=worker).status_code == 409
     accepted = client.patch(f"/api/v1/applications/{application_id}/accept", headers=business)
