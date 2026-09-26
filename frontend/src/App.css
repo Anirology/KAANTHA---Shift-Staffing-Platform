@@ -81,7 +81,7 @@
 .screen { display: grid; gap: 26px; }
 .summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .summary-card { display: grid; gap: 4px; padding: 18px 20px; background: white; border: 1px solid #c5d5d6; border-radius: 10px; }
-.summary-card strong { color: #0f4c5c; font-size: 1.8rem; }
+.summary-card strong { color: #0f4c5c; font-size: clamp(1.25rem, 2vw, 1.8rem); overflow-wrap: anywhere; }
 .summary-card span { color: #567079; text-transform: capitalize; font-size: .82rem; font-weight: 700; }
 .narrow-screen { max-width: 800px; margin: auto; }
 .screen-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
