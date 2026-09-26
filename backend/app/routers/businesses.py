@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -18,6 +19,10 @@ def my_businesses(user: User = Depends(require_role(UserRole.BUSINESS))):
 def create_business(data: BusinessCreate, user: User = Depends(require_role(UserRole.BUSINESS)), db: Session = Depends(get_db)):
     business = Business(user_id=user.id, business_name=data.business_name.strip())
     db.add(business)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "The business profile could not be created because the database schema is outdated. Redeploy the backend and try again.")
     db.refresh(business)
     return business
