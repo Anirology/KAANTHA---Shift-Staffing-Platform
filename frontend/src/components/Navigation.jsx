@@ -3,7 +3,7 @@ import { useState } from 'react'
 export function Navigation({ account, activeBusinessId, onSelectBusiness, activePath, onNavigate, onLogout }) {
   const [open, setOpen] = useState(false)
   const links = account?.role === 'WORKER'
-    ? [{ path: '/worker', label: 'Browse shifts' }, { path: '/worker/applications', label: 'My applications' }, { path: '/worker/profile', label: 'My profile' }]
+    ? [{ path: '/worker', label: 'Browse shifts' }, { path: '/worker/applications', label: 'My applications' }, { path: '/worker/profile', label: 'My profile' }, { path: '/worker/ratings', label: 'Ratings' }]
     : account?.role === 'BUSINESS'
       ? [{ path: '/business', label: 'Manage shifts' }, { path: '/business/shifts/new', label: 'Create shift' }, { path: '/business/shifts/import', label: 'CSV import' }, { path: '/business/reports', label: 'Reports' }, { path: '/business/accounts', label: 'Businesses' }]
       : [{ path: '/', label: 'Home' }, { path: '/login', label: 'Log in' }, { path: '/register/worker', label: 'Join as worker' }, { path: '/register/business', label: 'For businesses' }]

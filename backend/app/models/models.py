@@ -61,6 +61,7 @@ class Business(Base):
     business_name: Mapped[str] = mapped_column(String(150))
     user: Mapped[User] = relationship(back_populates="businesses")
     shifts: Mapped[list["Shift"]] = relationship(back_populates="business")
+    ratings: Mapped[list["Rating"]] = relationship(back_populates="business")
 
 
 class Skill(Base):
@@ -103,6 +104,7 @@ class Shift(Base):
     business: Mapped[Business] = relationship(back_populates="shifts")
     required_skill: Mapped[Skill] = relationship(back_populates="shifts")
     applications: Mapped[list["Application"]] = relationship(back_populates="shift")
+    ratings: Mapped[list["Rating"]] = relationship(back_populates="shift")
 
 
 class Application(Base):
@@ -125,3 +127,18 @@ class Attendance(Base):
     application_id: Mapped[int] = mapped_column(ForeignKey("applications.id"), unique=True)
     status: Mapped[str] = mapped_column(String(20), default=AttendanceStatus.NOT_MARKED.value)
     application: Mapped[Application] = relationship(back_populates="attendance")
+
+
+class Rating(Base):
+    __tablename__ = "ratings"
+    __table_args__ = (UniqueConstraint("shift_id", "worker_id", "business_id", name="uq_rating_shift_worker_business"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    shift_id: Mapped[int] = mapped_column(ForeignKey("shifts.id"))
+    worker_id: Mapped[int] = mapped_column(ForeignKey("workers.id"))
+    business_id: Mapped[int] = mapped_column(ForeignKey("businesses.id"))
+    score: Mapped[int] = mapped_column(Integer)
+    review: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    shift: Mapped[Shift] = relationship(back_populates="ratings")
+    worker: Mapped[Worker] = relationship()
+    business: Mapped[Business] = relationship(back_populates="ratings")

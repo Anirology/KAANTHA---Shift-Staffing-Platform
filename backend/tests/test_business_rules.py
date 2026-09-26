@@ -68,6 +68,11 @@ def test_full_vertical_slice_reports_and_completion(api):
     assert client.patch(f"/api/v1/applications/{application_id}/attendance", headers=business, json={"status": "PRESENT"}).status_code == 200
     completed = client.patch(f"/api/v1/shifts/{shift_id}/complete", headers=business)
     assert completed.status_code == 200 and completed.json()["status"] == "COMPLETED"
+    rating = client.post(f"/api/v1/shifts/{shift_id}/workers/{accepted.json()['worker_id']}/rating", headers=business, json={"score": 5, "review": "Reliable and punctual."})
+    assert rating.status_code == 201 and rating.json()["score"] == 5
+    assert client.post(f"/api/v1/shifts/{shift_id}/workers/{accepted.json()['worker_id']}/rating", headers=business, json={"score": 4}).status_code == 409
+    worker_ratings = client.get("/api/v1/workers/me/ratings", headers=worker)
+    assert worker_ratings.status_code == 200 and worker_ratings.json()[0]["business_name"] == "Business"
 
     staffing = client.get("/api/v1/reports/staffing", headers=business).json()
     assert staffing == [{"shift_id": shift_id, "role": "Cashier", "date": "2030-01-01", "required_workers": 1, "confirmed_workers": 1, "remaining_slots": 0, "status": "COMPLETED", "payment": "1500.00"}]

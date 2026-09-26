@@ -239,3 +239,20 @@ class AttendanceReport(BaseModel):
     attendance_status: AttendanceStatus | None
     completion_status: ShiftStatus
     rejection_reason: str | None
+
+
+class RatingCreate(BaseModel):
+    score: int = Field(ge=1, le=5)
+    review: str | None = Field(default=None, max_length=1000)
+
+
+class RatingResponse(BaseModel):
+    id: int
+    shift_id: int
+    worker_id: int
+    business_id: int
+    business_name: str
+    shift_role: str
+    score: int
+    review: str | None
+    created_at: datetime

@@ -396,7 +396,30 @@ The frontend calls the API through one service file. Local `VITE\_API\_BASE\_URL
 
 
 
-Ratings, advanced analytics, and skill-catalogue import have no v1 frontend endpoint contract. Define and announce their contracts before building those bonus screens.
+Advanced analytics and skill-catalogue import have no v1 frontend endpoint contract. Define and announce their contracts before building those bonus screens.
+
+## Ratings
+
+| Method and path | Access | Request | Success | Main errors |
+|---|---|---|---|---|
+| `POST /shifts/{shift_id}/workers/{worker_id}/rating` | Owning BUSINESS | `{score:1..5, review?:string}` | `201 Rating` | `404` shift; `409` not completed, worker not accepted, or duplicate; `422` invalid score |
+| `GET /workers/me/ratings` | WORKER | No body | `200 Rating[]` newest first | `401`, `403` |
+
+A business may rate an accepted worker once per completed shift. Workers see the score, optional review, business name, shift role, and creation time.
+
+## SHARED CONTRACT CHANGE - post-shift worker ratings (2026-09-27)
+
+OLD: Ratings were listed as a future bonus with no implemented model, endpoint, or screen.
+
+NEW: Completed shifts support one 1–5 rating per business, shift, and accepted worker. Workers have a protected ratings list.
+
+BACKEND IMPACT: Adds the ratings router, completion/ownership/acceptance validation, duplicate protection, and the two endpoints above.
+
+FRONTEND IMPACT: Completed applicant cards include a rating form, and workers have a My Ratings page with an average score.
+
+DATABASE IMPACT: Adds `ratings(id, shift_id, worker_id, business_id, score, review, created_at)` and a unique constraint across shift, worker, and business. Existing data is unchanged.
+
+DOCUMENTATION IMPACT: ERD, API demonstrations, and viva notes should include the rating lifecycle.
 
 ## SHARED CONTRACT CHANGE - multiple businesses per BUSINESS account (2026-09-26)
 

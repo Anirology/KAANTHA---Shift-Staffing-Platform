@@ -13,6 +13,7 @@ export function Applicants({ shiftId, onNavigate }) {
   const [actionError, setActionError] = useState('')
   const [feedback, setFeedback] = useState('')
   const [processingId, setProcessingId] = useState(null)
+  const [ratingDrafts, setRatingDrafts] = useState({})
   const load = useCallback(async () => {
     try { const [record, list] = await Promise.all([api.shift(shiftId), api.applicants(shiftId)]); setShift(record); setApplicants(list); setError(''); return true }
     catch (caught) { setError(caught.message); return false }
@@ -25,6 +26,9 @@ export function Applicants({ shiftId, onNavigate }) {
     try { await work(); if (await load()) setFeedback(success); else setActionError('Action succeeded, but the latest records could not be loaded. Try again.') }
     catch (caught) { setActionError(caught.message) }
     finally { setProcessingId(null) }
+  }
+  function updateRating(workerId, field, value) {
+    setRatingDrafts((current) => ({ ...current, [workerId]: { score: 5, review: '', ...current[workerId], [field]: value } }))
   }
   const incomplete = applicants.filter((item) => item.status === 'ACCEPTED').some((item) => !item.attendance_status || item.attendance_status === 'NOT_MARKED')
   const acceptedCount = applicants.filter((item) => item.status === 'ACCEPTED').length
@@ -41,6 +45,7 @@ export function Applicants({ shiftId, onNavigate }) {
             <div><h3>{item.worker_name}</h3><p>Applied {new Date(item.applied_at).toLocaleString()}</p>{item.status === 'ACCEPTED' && <p>Attendance: {item.attendance_status || 'NOT_MARKED'}</p>}{item.rejection_reason && <p>Reason: {item.rejection_reason}</p>}</div>
             <span className={`chip chip-${item.status?.toLowerCase()}`}>{item.status}</span>
             <div className="shift-actions"><Button type="button" disabled={processingId !== null || item.status !== 'PENDING' || shift.status !== 'OPEN'} onClick={() => act(item.id, () => api.acceptApplication(item.id), 'Application accepted.')}>Accept</Button><Button type="button" variant="secondary" disabled={processingId !== null || item.status !== 'PENDING'} onClick={() => act(item.id, () => api.rejectApplication(item.id), 'Application rejected.')}>Reject</Button>{item.status === 'ACCEPTED' && shift.status !== 'COMPLETED' && <><Button type="button" variant="secondary" disabled={processingId !== null} onClick={() => act(item.id, () => api.markAttendance(item.id, 'PRESENT'), 'Attendance marked present.')}>Present</Button><Button type="button" variant="secondary" disabled={processingId !== null} onClick={() => act(item.id, () => api.markAttendance(item.id, 'ABSENT'), 'Attendance marked absent.')}>Absent</Button></>}</div>
+            {item.status === 'ACCEPTED' && shift.status === 'COMPLETED' && <div className="rating-form"><label>Rating<select value={ratingDrafts[item.worker_id]?.score || 5} onChange={(event) => updateRating(item.worker_id, 'score', Number(event.target.value))}>{[5, 4, 3, 2, 1].map((score) => <option key={score} value={score}>{score} stars</option>)}</select></label><label>Review<input maxLength="1000" placeholder="Optional feedback" value={ratingDrafts[item.worker_id]?.review || ''} onChange={(event) => updateRating(item.worker_id, 'review', event.target.value)} /></label><Button type="button" disabled={processingId !== null} onClick={() => act(`rating-${item.id}`, () => api.rateWorker(shiftId, item.worker_id, { score: ratingDrafts[item.worker_id]?.score || 5, review: ratingDrafts[item.worker_id]?.review || null }), 'Worker rating saved.')}>Save rating</Button></div>}
           </article>)}</div>
         </DataState>
       </section><section className="panel detail-action"><h2>Shift completion</h2><p>{completionReason}</p><Button type="button" disabled={processingId !== null || !canComplete} onClick={() => act('complete', () => api.completeShift(shiftId), 'Shift completed.')}>Complete shift</Button></section></>}

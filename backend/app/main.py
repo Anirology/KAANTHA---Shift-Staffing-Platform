@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, businesses, imports, reports, shifts, workers
+from app.routers import auth, businesses, imports, ratings, reports, shifts, workers
 from app.seed_skills import seed
 
 
@@ -30,6 +30,7 @@ app.include_router(workers.router, prefix="/api/v1")
 app.include_router(shifts.router, prefix="/api/v1")
 app.include_router(imports.router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
+app.include_router(ratings.router, prefix="/api/v1")
 
 
 @app.get("/health")

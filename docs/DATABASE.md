@@ -2,7 +2,7 @@
 
 
 
-\*\*Status:\*\* Planned schema; tables are not yet confirmed as implemented.  
+\*\*Status:\*\* Implemented schema.
 
 \*\*Database:\*\* MySQL. IDs are database-generated, auto-incrementing integers.
 
@@ -38,6 +38,8 @@ Unless marked nullable, fields are required.
 
 | `attendance` | `id` INT PK; `application\_id` INT FK UNIQUE; `status` VARCHAR(20), default `NOT\_MARKED` |
 
+| `ratings` | `id` INT PK; `shift\_id` INT FK; `worker\_id` INT FK; `business\_id` INT FK; `score` INT; `review` TEXT nullable; `created\_at` DATETIME; UNIQUE (`shift\_id`, `worker\_id`, `business\_id`) |
+
 
 
 `password\_hash` stores a hash, never the original password. `business\_id` and `worker\_id` on protected records come from the authenticated user, not an ordinary form field.
@@ -62,6 +64,8 @@ Unless marked nullable, fields are required.
 
 \- An accepted application may have one attendance record.
 
+\- A completed shift may have one rating per accepted worker from its owning business.
+
 
 
 \## ER diagram
@@ -78,6 +82,8 @@ erDiagram
 
 &#x20;   USERS ||--o{ BUSINESSES : owns
 
+&#x20;   BUSINESSES ||--o{ RATINGS : gives
+
 &#x20;   BUSINESSES ||--o{ SHIFTS : posts
 
 &#x20;   SKILLS ||--o{ SHIFTS : required\_by
@@ -87,6 +93,10 @@ erDiagram
 &#x20;   SKILLS ||--o{ WORKER\_SKILLS : links
 
 &#x20;   WORKERS ||--o{ WORKER\_AVAILABILITY : sets
+
+&#x20;   WORKERS ||--o{ RATINGS : receives
+
+&#x20;   SHIFTS ||--o{ RATINGS : records
 
 &#x20;   WORKERS ||--o{ APPLICATIONS : submits
 

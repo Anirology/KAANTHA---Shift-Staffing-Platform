@@ -104,6 +104,8 @@ export const api = {
   rejectApplication: (id, reason) => request(`/applications/${id}/reject`, { method: 'PATCH', body: reason ? { reason } : {}, protectedRequest: true }),
   markAttendance: (id, status) => request(`/applications/${id}/attendance`, { method: 'PATCH', body: { status }, protectedRequest: true }),
   completeShift: (id) => request(`/shifts/${id}/complete`, { method: 'PATCH', protectedRequest: true }),
+  rateWorker: (shiftId, workerId, fields) => request(`/shifts/${shiftId}/workers/${workerId}/rating`, { method: 'POST', body: fields, protectedRequest: true }),
+  myRatings: () => request('/workers/me/ratings', { protectedRequest: true }),
   importShifts: (file) => { const form = new FormData(); form.append('file', file); return request('/shifts/import', { method: 'POST', body: form, protectedRequest: true }) },
   report: (kind, filters) => request(`/reports/${kind}${queryString(filters)}`, { protectedRequest: true }),
   exportReport: (kind, filters, format = 'csv') => request(`/reports/${kind}/export${format === 'pdf' ? '/pdf' : ''}${queryString(filters)}`, { protectedRequest: true, responseType: 'blob', accept: format === 'pdf' ? 'application/pdf' : 'text/csv' }),

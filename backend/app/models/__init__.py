@@ -4,6 +4,7 @@ from app.models.models import (
     Attendance,
     AttendanceStatus,
     Business,
+    Rating,
     Skill,
     Shift,
     ShiftStatus,
@@ -16,6 +17,6 @@ from app.models.models import (
 
 __all__ = [
     "Application", "ApplicationStatus", "Attendance", "AttendanceStatus",
-    "Business", "Skill", "Shift", "ShiftStatus", "User", "UserRole",
+    "Business", "Rating", "Skill", "Shift", "ShiftStatus", "User", "UserRole",
     "Worker", "WorkerAvailability", "WorkerSkill",
 ]
