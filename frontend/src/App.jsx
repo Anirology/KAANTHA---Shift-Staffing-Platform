@@ -144,7 +144,7 @@ export default function App() {
   } else if (route.path === '/worker/profile') {
     content = <WorkerProfile />
   } else if (route.path === '/business') {
-    content = <ManageShifts key={activeBusinessId} onNavigate={navigate} />
+    content = <ManageShifts key={activeBusinessId} businessName={account.businesses.find((business) => business.id === activeBusinessId)?.business_name} onNavigate={navigate} />
   } else if (route.path === '/business/accounts') {
     content = <BusinessAccounts businesses={account.businesses} activeBusinessId={activeBusinessId} onSelect={selectBusiness} onAdd={addBusiness} />
   } else if (route.path === '/business/shifts/import') {

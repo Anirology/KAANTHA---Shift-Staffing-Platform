@@ -47,18 +47,27 @@ export function BrowseShifts({ onNavigate }) {
     finally { setAddingSkill(false) }
   }
 
+  function clearFilters() {
+    const empty = { role: '', skill_id: '', date: '', min_payment: '' }
+    setFilters(empty)
+    setLoading(true)
+    setError('')
+    setQuery({ status: 'OPEN' })
+  }
+
   return (
     <div className="screen">
-      <header className="screen-heading"><div><span className="intro-eyebrow">Worker</span><h1>Browse shifts</h1><p>Find open shifts that fit your schedule and skills.</p></div></header>
+      <header className="screen-heading"><div><span className="intro-eyebrow">Worker</span><h1>Browse shifts</h1><p>Explore open shifts and check their required skills and times.</p></div></header>
       <form className="filter-panel" onSubmit={(event) => { event.preventDefault(); setLoading(true); setError(''); setQuery({ status: 'OPEN', ...filters }) }}>
         <Field id="filter-role" label="Job role" placeholder="e.g. Cashier" value={filters.role} onChange={(event) => setFilters({ ...filters, role: event.target.value })} />
         <div className="field"><label htmlFor="filter-skill">Required skill</label><select id="filter-skill" value={filters.skill_id} onChange={(event) => setFilters({ ...filters, skill_id: event.target.value })}><option value="">Any skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></div>
         <Field id="filter-date" label="Date" type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
         <Field id="filter-payment" label="Minimum payment (LKR)" type="number" min="0" step="0.01" value={filters.min_payment} onChange={(event) => setFilters({ ...filters, min_payment: event.target.value })} />
-        <Button type="submit">Find shifts</Button>
+        <div className="filter-actions"><Button type="submit">Find shifts</Button><Button type="button" variant="secondary" onClick={clearFilters}>Clear</Button></div>
       </form>
-      <DataState loading={loading} error={error} onRetry={retry} empty={shifts.length === 0} emptyMessage="No open shifts match these filters.">
-        <div className="card-list">{shifts.map((shift) => <ShiftCard key={shift.id} shift={shift} actions={<Button type="button" onClick={() => onNavigate(`/worker/shifts/${shift.id}`)}>View details</Button>} />)}</div>
+      {!loading && !error && <p className="results-summary" role="status">{shifts.length} open {shifts.length === 1 ? 'shift' : 'shifts'} found</p>}
+      <DataState loading={loading} error={error} onRetry={retry} empty={shifts.length === 0} emptyMessage="No open shifts match these filters." emptyAction={<Button type="button" variant="secondary" onClick={clearFilters}>Clear filters</Button>}>
+        <div className="card-list">{shifts.map((shift) => <div className="shift-result" key={shift.id}><span className={`match-label ${profile?.skills?.some((skill) => skill.id === shift.required_skill_id) ? 'match-yes' : 'match-no'}`}>{profile?.skills?.some((skill) => skill.id === shift.required_skill_id) ? 'Skill match' : 'Skill needed'}</span><ShiftCard shift={shift} actions={<Button type="button" onClick={() => onNavigate(`/worker/shifts/${shift.id}`)}>View details</Button>} /></div>)}</div>
       </DataState>
       {!loading && !error && <section className="panel skill-panel" aria-labelledby="skill-heading">
         <div><h2 id="skill-heading">My skills</h2><p>Businesses confirm skills before accepting an application.</p><p>{profile?.skills?.length ? profile.skills.map((skill) => skill.name).join(', ') : 'No skills added yet.'}</p></div>
