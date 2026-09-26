@@ -30,6 +30,8 @@ The frontend uses `http://127.0.0.1:8000` in development by default. To use a di
 
 The root `vercel.json` deploys the Vite frontend and FastAPI backend on one domain. Connect a persistent Postgres database through Vercel Storage; the Neon integration supplies `DATABASE_URL`. Set a fixed `JWT_SECRET` for production. The backend creates missing tables and starter skills on startup. Local SQLite files are not suitable for persistent data on Vercel.
 
+Follow the complete environment, database migration, GitHub import, and production CRUD checklist in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 ## Checks
 
 ```powershell
