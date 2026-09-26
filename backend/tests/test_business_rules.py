@@ -85,6 +85,10 @@ def test_full_vertical_slice_reports_and_completion(api):
         export = client.get(f"/api/v1/reports/{endpoint}/export", headers=business)
         assert export.status_code == 200
         assert export.text.splitlines()[0] == header
+        pdf = client.get(f"/api/v1/reports/{endpoint}/export/pdf", headers=business)
+        assert pdf.status_code == 200
+        assert pdf.headers["content-type"] == "application/pdf"
+        assert pdf.content.startswith(b"%PDF")
 
 
 def test_roles_cross_business_ownership_missing_skill_and_capacity(api):

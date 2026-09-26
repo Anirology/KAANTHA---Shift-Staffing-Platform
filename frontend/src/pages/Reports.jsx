@@ -21,7 +21,7 @@ export function Reports() {
   const [filters, setFilters] = useState({ from_date: '', to_date: '' })
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [exporting, setExporting] = useState(false)
+  const [exporting, setExporting] = useState('')
   const [error, setError] = useState('')
   const [exportError, setExportError] = useState('')
   const requestId = useRef(0)
@@ -32,18 +32,18 @@ export function Reports() {
     finally { if (id === requestId.current) setLoading(false) }
   }, [kind, filters])
   useEffect(() => { const timer = window.setTimeout(load, 0); return () => window.clearTimeout(timer) }, [load])
-  async function download() {
-    setExporting(true); setExportError('')
+  async function download(format) {
+    setExporting(format); setExportError('')
     try {
-      const blob = await api.exportReport(kind, filters)
+      const blob = await api.exportReport(kind, filters, format)
       const url = URL.createObjectURL(blob)
       const anchor = document.createElement('a')
-      anchor.href = url; anchor.download = `${kind}-report.csv`; document.body.append(anchor); anchor.click(); anchor.remove()
+      anchor.href = url; anchor.download = `shiftly-${kind}-report.${format}`; document.body.append(anchor); anchor.click(); anchor.remove()
       window.setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch (caught) { setExportError(caught.message) }
-    finally { setExporting(false) }
+    finally { setExporting('') }
   }
-  return <div className="screen reports-screen"><header className="screen-heading"><div><span className="intro-eyebrow">SHIFTLY · BUSINESS</span><h1>Business reports</h1><p>Review live shift data and download the same filtered rows as CSV.</p></div><Button type="button" variant="secondary" disabled={loading || exporting || !!error} onClick={download}>{exporting ? 'Preparing…' : 'Download CSV'}</Button></header>
+  return <div className="screen reports-screen"><header className="screen-heading"><div><span className="intro-eyebrow">SHIFTLY · BUSINESS</span><h1>Business reports</h1><p>Review live shift data and download the same filtered rows as CSV or a branded PDF.</p></div><div className="shift-actions"><Button type="button" variant="secondary" disabled={loading || !!exporting || !!error} onClick={() => download('csv')}>{exporting === 'csv' ? 'Preparing…' : 'Download CSV'}</Button><Button type="button" disabled={loading || !!exporting || !!error} onClick={() => download('pdf')}>{exporting === 'pdf' ? 'Preparing…' : 'Download PDF'}</Button></div></header>
     <div className="report-tabs" role="group" aria-label="Report type">{Object.entries(reports).map(([key, report]) => <button type="button" className={kind === key ? 'report-tab active' : 'report-tab'} key={key} aria-pressed={kind === key} onClick={() => { if (kind === key) return; requestId.current += 1; setKind(key); setRows([]); setLoading(true); setError(''); setExportError('') }}>{report.title}</button>)}</div>
     <form className="report-filters panel" onSubmit={(event) => { event.preventDefault(); if (draft.from_date && draft.to_date && draft.from_date > draft.to_date) { requestId.current += 1; setLoading(false); setError('From date must be on or before to date.'); return }; requestId.current += 1; setRows([]); setLoading(true); setFilters({ ...draft }); setError('') }}><Field id="report-from" label="From date" type="date" value={draft.from_date} onChange={(event) => setDraft({ ...draft, from_date: event.target.value })} /><Field id="report-to" label="To date" type="date" value={draft.to_date} onChange={(event) => setDraft({ ...draft, to_date: event.target.value })} /><Button type="submit">Apply dates</Button></form>
     {exportError && <StatusMessage type="error">{exportError}</StatusMessage>}

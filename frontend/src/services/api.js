@@ -44,7 +44,7 @@ export function saveBusinessId(id) {
   sessionStorage.setItem(businessKey, String(id))
 }
 
-async function request(path, { method = 'GET', body, protectedRequest = false, token, responseType = 'json' } = {}) {
+async function request(path, { method = 'GET', body, protectedRequest = false, token, responseType = 'json', accept } = {}) {
   if (!validOrigin(origin) || (import.meta.env.PROD && !origin.startsWith('https://'))) throw new Error('The Shiftly API origin is invalid.')
   const bearer = token || (protectedRequest ? getToken() : null)
   let response
@@ -52,7 +52,7 @@ async function request(path, { method = 'GET', body, protectedRequest = false, t
     response = await fetch(`${baseUrl}${path}`, {
       method,
       headers: {
-        Accept: responseType === 'blob' ? 'text/csv' : 'application/json',
+        Accept: accept || (responseType === 'blob' ? 'application/octet-stream' : 'application/json'),
         ...(body && !(body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
         ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
         ...(protectedRequest && getBusinessId() ? { 'X-Business-Id': String(getBusinessId()) } : {}),
@@ -106,5 +106,5 @@ export const api = {
   completeShift: (id) => request(`/shifts/${id}/complete`, { method: 'PATCH', protectedRequest: true }),
   importShifts: (file) => { const form = new FormData(); form.append('file', file); return request('/shifts/import', { method: 'POST', body: form, protectedRequest: true }) },
   report: (kind, filters) => request(`/reports/${kind}${queryString(filters)}`, { protectedRequest: true }),
-  exportReport: (kind, filters) => request(`/reports/${kind}/export${queryString(filters)}`, { protectedRequest: true, responseType: 'blob' }),
+  exportReport: (kind, filters, format = 'csv') => request(`/reports/${kind}/export${format === 'pdf' ? '/pdf' : ''}${queryString(filters)}`, { protectedRequest: true, responseType: 'blob', accept: format === 'pdf' ? 'application/pdf' : 'text/csv' }),
 }

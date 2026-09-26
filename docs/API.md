@@ -374,6 +374,14 @@ All reports are limited to the logged-in business’s shifts. Every endpoint acc
 
 | `GET /reports/attendance` | `GET /reports/attendance/export` | `worker\_id, worker\_name, shift\_id, role, date, application\_status, attendance\_status, completion\_status, rejection\_reason` |
 
+Branded PDF downloads mirror the same rows, ownership checks, and date filters:
+
+- `GET /reports/staffing/export/pdf`
+- `GET /reports/workers/export/pdf`
+- `GET /reports/attendance/export/pdf`
+
+They return `application/pdf` attachments containing the Shiftly identity, report purpose, selected business, period, generation time, a teal data table, and page numbers.
+
 
 
 `payment` and `total\_earnings` are decimal strings. `total\_hours` is a decimal number. Worker hours and earnings count `PRESENT` workers on `COMPLETED` shifts. `rejection\_reason` may be null and comes from an actual business rejection. Failed acceptance attempts are not saved as fake “conflict history.” Report endpoints return `401` or `403` for unauthorized access and `422` for invalid filters.
@@ -403,4 +411,18 @@ FRONTEND IMPACT: The navigation shows the active business and allows switching. 
 DATABASE IMPACT: `businesses.user_id` is a non-unique indexed foreign key. Existing MySQL or PostgreSQL databases must remove the old unique rule before a second business can be created; `create_all` alone does not migrate it. See `backend/migrations/allow_multiple_businesses.py` and back up before running it.
 
 DOCUMENTATION IMPACT: The database relationship is now USERS one-to-many BUSINESSES. Update examples, demo steps, and production migration notes together. The existing WORKER-versus-BUSINESS account roles remain unchanged.
+
+## SHARED CONTRACT CHANGE - branded PDF report exports (2026-09-27)
+
+OLD: Each report could be viewed as JSON or downloaded only as CSV through `/reports/{kind}/export`.
+
+NEW: Each report also supports `GET /reports/{kind}/export/pdf`, where `{kind}` is `staffing`, `workers`, or `attendance`. Optional `from_date` and `to_date` filters and `X-Business-Id` behavior are unchanged.
+
+BACKEND IMPACT: ReportLab generates an in-memory `application/pdf` attachment. The server does not create persistent report files.
+
+FRONTEND IMPACT: Reports now provides separate Download CSV and Download PDF actions using the same active filters.
+
+DATABASE IMPACT: None. PDF generation reads the same report queries and does not store new data.
+
+DOCUMENTATION IMPACT: API, deployment dependencies, and report demonstrations must include the three PDF endpoints.
 

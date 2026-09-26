@@ -53,3 +53,7 @@ Existing MySQL and PostgreSQL databases still contain a unique rule on `business
 
 Run this against each existing environment before testing the second-business flow. Do not point the migration at production until its backup and `DATABASE_URL` have been verified. Fresh databases built from the current models need no migration. After deployment, test that switching businesses changes the shift and report data, and that another account cannot select either business.
 
+## Report downloads
+
+Business users can view staffing, worker hours/earnings, and attendance reports, filter them by date, and download either CSV or a branded PDF. PDFs are generated in memory and include the selected business, report purpose, period, Shiftly styling, and page numbers.
+
