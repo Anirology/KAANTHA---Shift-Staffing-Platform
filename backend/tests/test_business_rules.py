@@ -122,7 +122,8 @@ def test_adjacent_shifts_are_allowed_and_overlaps_stay_pending(api):
     business, worker = register_business(client), register_worker(client)
     skill = skill_id(sessions)
     assert client.post("/api/v1/workers/me/skills", headers=worker, json={"skill_id": skill}).status_code == 201
-    first = apply(client, worker, create_shift(client, business, skill, "09:00:00", "10:00:00"))
+    first_shift = create_shift(client, business, skill, "09:00:00", "10:00:00")
+    first = apply(client, worker, first_shift)
     assert client.patch(f"/api/v1/applications/{first}/accept", headers=business).status_code == 200
     adjacent = apply(client, worker, create_shift(client, business, skill, "10:00:00", "11:00:00"))
     assert client.patch(f"/api/v1/applications/{adjacent}/accept", headers=business).status_code == 200
@@ -130,6 +131,14 @@ def test_adjacent_shifts_are_allowed_and_overlaps_stay_pending(api):
     assert client.patch(f"/api/v1/applications/{overlapping}/accept", headers=business).status_code == 409
     applications = client.get("/api/v1/workers/me/applications", headers=worker).json()
     assert next(item for item in applications if item["id"] == overlapping)["status"] == "PENDING"
+
+    assert client.patch(f"/api/v1/shifts/{first_shift}", headers=business, json={"end_time": "10:30:00"}).status_code == 409
+    with sessions() as db:
+        other_skill = Skill(name="Kitchen Assistant", description="Another skill")
+        db.add(other_skill)
+        db.commit()
+        other_skill_id = other_skill.id
+    assert client.patch(f"/api/v1/shifts/{first_shift}", headers=business, json={"required_skill_id": other_skill_id}).status_code == 409
 
 
 def test_csv_import_reports_valid_and_invalid_rows(api):

@@ -3,11 +3,11 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, aliased, joinedload
 
 from app.database import get_db
 from app.dependencies import get_business, get_current_user, get_worker, resolve_business
-from app.models import Application, ApplicationStatus, Attendance, AttendanceStatus, Business, Shift, ShiftStatus, Skill, User, Worker
+from app.models import Application, ApplicationStatus, Attendance, AttendanceStatus, Business, Shift, ShiftStatus, Skill, User, Worker, WorkerSkill
 from app.schemas.schemas import ApplicationResponse, AttendanceRequest, RejectionRequest, ShiftBase, ShiftPatch, ShiftResponse
 from app.routers.workers import application_response
 from app.services.acceptance import accept_application
@@ -75,10 +75,28 @@ def update_shift(shift_id: int, data: ShiftPatch, business: Business = Depends(g
     if shift.status in {ShiftStatus.COMPLETED.value, ShiftStatus.CANCELLED.value}: raise HTTPException(409, "Completed or cancelled shifts cannot be edited.")
     values = data.model_dump(exclude_unset=True)
     if "required_skill_id" in values and not db.get(Skill, values["required_skill_id"]): raise HTTPException(404, "Skill not found.")
-    accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0
+    accepted_applications = db.scalars(select(Application).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)).all()
+    accepted = len(accepted_applications)
     if values.get("required_workers", shift.required_workers) < accepted: raise HTTPException(409, "Required workers cannot be below accepted workers.")
     start, end = values.get("start_time", shift.start_time), values.get("end_time", shift.end_time)
     if start >= end: raise HTTPException(422, "start_time must be before end_time")
+    proposed_date = values.get("date", shift.date)
+    proposed_skill = values.get("required_skill_id", shift.required_skill_id)
+    other_shift = aliased(Shift)
+    for application in accepted_applications:
+        has_skill = db.scalar(select(WorkerSkill.worker_id).where(WorkerSkill.worker_id == application.worker_id, WorkerSkill.skill_id == proposed_skill))
+        if not has_skill:
+            raise HTTPException(409, "The edit would invalidate an accepted worker's required skill.")
+        overlap = db.scalar(select(Application.id).join(other_shift, Application.shift_id == other_shift.id).where(
+            Application.worker_id == application.worker_id,
+            Application.status == ApplicationStatus.ACCEPTED.value,
+            Application.shift_id != shift.id,
+            other_shift.date == proposed_date,
+            other_shift.start_time < end,
+            other_shift.end_time > start,
+        ))
+        if overlap:
+            raise HTTPException(409, "The edit would overlap an accepted worker's confirmed shift.")
     for key, value in values.items(): setattr(shift, key, value)
     if shift.status == ShiftStatus.FILLED.value and accepted < shift.required_workers:
         shift.status = ShiftStatus.OPEN.value

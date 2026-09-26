@@ -254,6 +254,8 @@ The shift `role` means job title, such as “Cashier”; it is not the account r
 
 Workers browse open shifts and may see details of shifts they applied to. Businesses use `/businesses/me/shifts` for their own management view. Completed or cancelled shifts cannot be edited. `required\_workers` cannot be reduced below the accepted count.
 
+When a shift already has accepted workers, editing its date, time, or required skill revalidates those workers. An edit returns `409` if it would create an overlap with another confirmed shift or require a skill an accepted worker does not have.
+
 
 
 \## Applications, acceptance, and attendance
