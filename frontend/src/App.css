@@ -11,6 +11,9 @@
 .business-switcher { display: grid; gap: 3px; color: #e9f6f4; font-size: .72rem; font-weight: 700; }
 .business-switcher select { max-width: 205px; min-height: 35px; border: 1px solid #87c6c1; border-radius: 7px; background: #fff; color: #17313a; padding: 5px 8px; font: inherit; font-size: .85rem; }
 .page-shell { max-width: 1120px; margin: auto; padding: 56px 24px 72px; }
+.dashboard-shell { position: relative; }
+html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-shell) { min-height: 100%; background-color: #e7f0ef; }
+#root:has(.dashboard-shell) { background-image: url('/dashboard-doodle.png'); background-repeat: no-repeat; background-position: center 72px; background-size: 100% auto; background-attachment: fixed; }
 .auth-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 450px); align-items: center; gap: clamp(32px, 7vw, 110px); }
 .intro-eyebrow { color: #0e8f88; font-weight: 800; text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; }
 .intro h1 { color: #17313a; font-size: clamp(2.4rem, 5vw, 4.25rem); line-height: 1.07; letter-spacing: -.04em; margin: 18px 0 20px; }

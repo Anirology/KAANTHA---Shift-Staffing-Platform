@@ -172,7 +172,7 @@ export default function App() {
   }
 
   return (
-      <PageLayout navigation={<Navigation account={account} activeBusinessId={activeBusinessId} onSelectBusiness={selectBusiness} activePath={path} onNavigate={navigate} onLogout={logout} />}>
+      <PageLayout dashboard={Boolean(account && route.role)} navigation={<Navigation account={account} activeBusinessId={activeBusinessId} onSelectBusiness={selectBusiness} activePath={path} onNavigate={navigate} onLogout={logout} />}>
       {sessionError && <StatusMessage type="error">{sessionError}</StatusMessage>}
       {content}
       {guide && <PageGuide key={route.path} guideKey={route.path} title={guide[0]}>{guide[1]}</PageGuide>}

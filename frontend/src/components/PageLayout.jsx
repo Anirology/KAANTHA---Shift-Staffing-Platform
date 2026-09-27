@@ -1,3 +1,3 @@
-export function PageLayout({ navigation, children }) {
-  return <>{navigation}<main className="page-shell" id="main-content">{children}</main></>
+export function PageLayout({ navigation, children, dashboard = false }) {
+  return <>{navigation}<main className={`page-shell ${dashboard ? 'dashboard-shell' : ''}`} id="main-content">{children}</main></>
 }
