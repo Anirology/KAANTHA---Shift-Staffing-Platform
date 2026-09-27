@@ -36,7 +36,6 @@ export function Landing({ onNavigate }) {
           <img className="landing-float landing-float-shift" src="/landing-shift-card.png" alt="New Barista shift posted today" />
           <img className="landing-float landing-float-applicants" src="/landing-applicants.png" alt="Twelve people applied for a shift" />
           <img className="landing-float landing-float-confirmed" src="/landing-confirmed.png" alt="Shift confirmed" />
-          <p className="landing-note" aria-hidden="true">Flexible work<br />Stronger teams</p>
         </div>
       </section>
 
