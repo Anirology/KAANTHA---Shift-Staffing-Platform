@@ -6,11 +6,12 @@ export function Navigation({ account, activeBusinessId, onSelectBusiness, active
     ? [{ path: '/worker', label: 'Browse shifts' }, { path: '/worker/applications', label: 'My applications' }, { path: '/worker/profile', label: 'My profile' }, { path: '/worker/ratings', label: 'Ratings' }]
     : account?.role === 'BUSINESS'
       ? [{ path: '/business', label: 'Manage shifts' }, { path: '/business/shifts/new', label: 'Create shift' }, { path: '/business/shifts/import', label: 'CSV import' }, { path: '/business/reports', label: 'Reports' }, { path: '/business/accounts', label: 'Businesses' }]
-      : [{ path: '/', label: 'Home' }, { path: '/login', label: 'Log in' }, { path: '/register/worker', label: 'Join as worker' }, { path: '/register/business', label: 'For businesses' }]
+      : [{ path: '/', label: 'Home' }, { path: '/register/worker', label: 'Find shifts' }, { path: '/register/worker', label: 'Join as worker' }, { path: '/register/business', label: 'For businesses' }]
   const home = account?.role === 'WORKER' ? '/worker' : account?.role === 'BUSINESS' ? '/business' : '/'
+  const isPublic = !account
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${isPublic ? 'public-site-header' : ''}`}>
       <nav className="nav-inner" aria-label="Main navigation">
         <a className="brand" href={`#${home}`} onClick={() => onNavigate(home)}><img src="/shiftly-logo.png" alt="" />Shiftly</a>
         <button className="nav-toggle" type="button" aria-expanded={open} aria-controls="main-links" onClick={() => setOpen((value) => !value)}><span aria-hidden="true">☰</span><span className="sr-only">Menu</span></button>
@@ -20,7 +21,10 @@ export function Navigation({ account, activeBusinessId, onSelectBusiness, active
           </select>
         </label>}
         <div className={`nav-links ${open ? 'nav-links-open' : ''}`} id="main-links">
-          {links.map(({ path, label }) => <a className="nav-link" href={`#${path}`} aria-current={activePath === path ? 'page' : undefined} onClick={() => { setOpen(false); onNavigate(path) }} key={path}>{label}</a>)}
+          {links.map(({ path, label }) => <a className="nav-link" href={`#${path}`} aria-current={activePath === path ? 'page' : undefined} onClick={() => { setOpen(false); onNavigate(path) }} key={`${path}-${label}`}>{label}</a>)}
+          {isPublic && <span className="nav-search" aria-hidden="true">⌕</span>}
+          {isPublic && <a className="nav-link nav-login" href="#/login" onClick={() => { setOpen(false); onNavigate('/login') }}>Log in</a>}
+          {isPublic && <a className="nav-link nav-get-started" href="#/register/worker" onClick={() => { setOpen(false); onNavigate('/register/worker') }}>Get started</a>}
           {account && <button className="nav-link nav-button" type="button" onClick={onLogout}>Log out</button>}
         </div>
       </nav>
