@@ -223,7 +223,7 @@ th { color: #0f4c5c; background: #e7f0ef; }
 .public-site-header .nav-login { min-width: 88px; text-align: center; border-color: rgba(255, 255, 255, .5); }
 .public-site-header .nav-get-started { min-width: 108px; text-align: center; margin-left: 4px; background: #a4f4c4; color: #082d37; border-color: #a4f4c4; }
 .public-site-header .nav-get-started:hover { background: #c3fbd8; color: #082d37; }
-html:has(.landing), body:has(.landing), #root:has(.landing) { background: #f8fbfa; }
+html:has(.public-site-header), body:has(.public-site-header), #root:has(.public-site-header) { background: #f8fbfa; }
 .page-shell:has(.landing) { max-width: 1440px; padding: 26px clamp(24px, 5vw, 72px) 68px; overflow: hidden; background: #f8fbfa; }
 .landing { display: grid; gap: 74px; padding: 0; }
 .landing h1, .landing h2 { color: #071f2e; }
