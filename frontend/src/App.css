@@ -219,7 +219,6 @@ th { color: #0f4c5c; background: #e7f0ef; }
 .public-site-header .nav-links { gap: 4px; }
 .public-site-header .nav-link { padding: 10px 14px; font-size: .82rem; }
 .public-site-header .nav-link[aria-current="page"] { background: rgba(255, 255, 255, .12); }
-.public-site-header .nav-search { display: grid; place-items: center; width: 38px; height: 38px; margin-left: 16px; color: white; font-size: 1.7rem; transform: rotate(-18deg); }
 .public-site-header .nav-login { min-width: 88px; text-align: center; border-color: rgba(255, 255, 255, .5); }
 .public-site-header .nav-get-started { min-width: 108px; text-align: center; margin-left: 4px; background: #a4f4c4; color: #082d37; border-color: #a4f4c4; }
 .public-site-header .nav-get-started:hover { background: #c3fbd8; color: #082d37; }
@@ -293,7 +292,6 @@ html:has(.public-site-header), body:has(.public-site-header), #root:has(.public-
   .public-site-header .nav-toggle { display: grid; place-items: center; }
   .public-site-header .nav-links { display: none; order: 4; width: 100%; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.2); }
   .public-site-header .nav-links-open { display: grid; }
-  .public-site-header .nav-search { display: none; }
   .public-site-header .nav-link { width: 100%; text-align: left; }
   .landing-hero { grid-template-columns: 1fr; }
   .landing-hero-copy { max-width: 650px; padding-top: 28px; }

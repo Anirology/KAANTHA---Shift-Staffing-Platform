@@ -22,7 +22,6 @@ export function Navigation({ account, activeBusinessId, onSelectBusiness, active
         </label>}
         <div className={`nav-links ${open ? 'nav-links-open' : ''}`} id="main-links">
           {links.map(({ path, label }) => <a className="nav-link" href={`#${path}`} aria-current={activePath === path ? 'page' : undefined} onClick={() => { setOpen(false); onNavigate(path) }} key={`${path}-${label}`}>{label}</a>)}
-          {isPublic && <span className="nav-search" aria-hidden="true">⌕</span>}
           {isPublic && <a className="nav-link nav-login" href="#/login" onClick={() => { setOpen(false); onNavigate('/login') }}>Log in</a>}
           {isPublic && <a className="nav-link nav-get-started" href="#/register/worker" onClick={() => { setOpen(false); onNavigate('/register/worker') }}>Get started</a>}
           {account && <button className="nav-link nav-button" type="button" onClick={onLogout}>Log out</button>}
