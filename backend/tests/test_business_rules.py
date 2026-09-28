@@ -1,5 +1,6 @@
 """Exercise end-to-end API behavior, ownership, shift rules, CSV imports, ratings, and reports."""
 
+import base64
 from decimal import Decimal
 from uuid import uuid4
 
@@ -71,11 +72,16 @@ def test_full_vertical_slice_reports_and_completion(api):
     assert accepted.status_code == 200 and accepted.json()["status"] == "ACCEPTED"
     assert client.patch(f"/api/v1/applications/{application_id}/accept", headers=business).status_code == 409
     assert client.patch(f"/api/v1/shifts/{shift_id}/complete", headers=business).status_code == 409
+    assert client.post(f"/api/v1/shifts/{shift_id}/workers/{accepted.json()['worker_id']}/rating", headers=business, json={"score": 4}).status_code == 409
     assert client.patch(f"/api/v1/applications/{application_id}/attendance", headers=business, json={"status": "PRESENT"}).status_code == 200
+    early_rating = client.post(f"/api/v1/shifts/{shift_id}/workers/{accepted.json()['worker_id']}/rating", headers=business, json={"score": 5, "review": "Present before completion."})
+    assert early_rating.status_code == 201
+    applicants = client.get(f"/api/v1/shifts/{shift_id}/applications", headers=business).json()
+    assert applicants[0]["rated"] is True
     completed = client.patch(f"/api/v1/shifts/{shift_id}/complete", headers=business)
     assert completed.status_code == 200 and completed.json()["status"] == "COMPLETED"
     rating = client.post(f"/api/v1/shifts/{shift_id}/workers/{accepted.json()['worker_id']}/rating", headers=business, json={"score": 5, "review": "Reliable and punctual."})
-    assert rating.status_code == 201 and rating.json()["score"] == 5
+    assert rating.status_code == 409
     assert client.post(f"/api/v1/shifts/{shift_id}/workers/{accepted.json()['worker_id']}/rating", headers=business, json={"score": 4}).status_code == 409
     worker_ratings = client.get("/api/v1/workers/me/ratings", headers=worker)
     assert worker_ratings.status_code == 200 and worker_ratings.json()[0]["business_name"] == "Business"
@@ -100,6 +106,35 @@ def test_full_vertical_slice_reports_and_completion(api):
         assert pdf.status_code == 200
         assert pdf.headers["content-type"] == "application/pdf"
         assert pdf.content.startswith(b"%PDF")
+
+
+def test_worker_and_business_profile_photo_http_flow(api):
+    client, _ = api
+    worker = register_worker(client)
+    business = register_business(client)
+    worker_id = client.get("/api/v1/workers/me", headers=worker).json()["id"]
+    business_id = client.get("/api/v1/businesses/me", headers=business).json()[0]["id"]
+    png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jp5sAAAAASUVORK5CYII=")
+
+    worker_upload = client.put("/api/v1/workers/me/photo", headers=worker, files={"file": ("worker.png", png, "image/png")})
+    assert worker_upload.status_code == 200
+    worker_photo_path = f"/api/v1/workers/{worker_id}/photo"
+    assert worker_upload.json()["photo_url"] == worker_photo_path
+    assert client.get("/api/v1/workers/me", headers=worker).json()["photo_url"] == worker_photo_path
+    assert client.get(worker_photo_path).content == png
+    assert client.put("/api/v1/workers/me/photo", headers=business, files={"file": ("worker.png", png, "image/png")}).status_code == 403
+    assert client.delete("/api/v1/workers/me/photo", headers=worker).status_code == 204
+    assert client.get(worker_photo_path).status_code == 404
+
+    business_photo_path = f"/api/v1/businesses/{business_id}/photo"
+    business_upload = client.put(business_photo_path, headers=business, files={"file": ("business.png", png, "image/png")})
+    assert business_upload.status_code == 200
+    assert business_upload.json()["photo_url"] == business_photo_path
+    assert client.get("/api/v1/businesses/me", headers=business).json()[0]["photo_url"] == business_photo_path
+    assert client.get(business_photo_path).content == png
+    assert client.delete(business_photo_path, headers=worker).status_code == 403
+    assert client.delete(business_photo_path, headers=business).status_code == 204
+    assert client.get(business_photo_path).status_code == 404
 
 
 def test_roles_cross_business_ownership_missing_skill_and_capacity(api):
@@ -163,12 +198,10 @@ def test_csv_import_reports_valid_and_invalid_rows(api):
     assert response.json()["failed"] == 1
     assert response.json()["errors"]
 
-    skill_csv = "skill_name,description\nCashier,Duplicate\nWaiter,Serves customers\n,Missing name\n"
-    skills = client.post("/api/v1/skills/import", headers=business, files={"file": ("skills.csv", skill_csv, "text/csv")})
-    assert skills.status_code == 200
-    assert skills.json() == {"total": 3, "created": 1, "duplicates": 1, "failed": 1, "errors": [{"row": 4, "field": "skill_name", "message": "Skill name is required."}]}
     worker = register_worker(client)
-    assert client.post("/api/v1/skills/import", headers=worker, files={"file": ("skills.csv", skill_csv, "text/csv")}).status_code == 403
+    skill_import = ("/api/v1/skills/import", {"file": ("skills.csv", "skill_name,description\nWaiter,Serves customers\n", "text/csv")})
+    assert client.post(skill_import[0], headers=business, files=skill_import[1]).status_code == 404
+    assert client.post(skill_import[0], headers=worker, files=skill_import[1]).status_code == 404
 
 
 def test_one_login_can_manage_two_businesses_without_cross_business_access(api):

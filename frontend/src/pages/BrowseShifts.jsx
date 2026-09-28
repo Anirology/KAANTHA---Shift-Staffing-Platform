@@ -6,6 +6,8 @@ import { DataState } from '../components/DataState'
 import { Field } from '../components/Field'
 import { ShiftCard } from '../components/ShiftCard'
 import { StatusMessage } from '../components/StatusMessage'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCalendarDays, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 
 export function BrowseShifts({ onNavigate }) {
   const [filters, setFilters] = useState({ role: '', skill_id: '', date: '', min_payment: '' })
@@ -58,13 +60,13 @@ export function BrowseShifts({ onNavigate }) {
 
   return (
     <div className="screen">
-      <header className="screen-heading"><div><span className="intro-eyebrow">Worker</span><h1>Browse shifts</h1><p>Explore open shifts and check their required skills and times.</p></div></header>
+      <header className="dashboard-hero"><div className="dashboard-hero-copy"><span className="intro-eyebrow">Worker</span><h1>Browse shifts</h1><p>Explore open shifts and check their required skills and times.</p></div><div className="worker-hero-art" aria-hidden="true"><span className="hero-soft-shape"/><span className="hero-calendar"><FontAwesomeIcon icon={faCalendarDays} /></span><img src="/shiftly-worker-cutout.png" alt="" /></div></header>
       <form className="filter-panel" onSubmit={(event) => { event.preventDefault(); setLoading(true); setError(''); setQuery({ status: 'OPEN', ...filters }) }}>
         <Field id="filter-role" label="Job role" placeholder="e.g. Cashier" value={filters.role} onChange={(event) => setFilters({ ...filters, role: event.target.value })} />
         <div className="field"><label htmlFor="filter-skill">Required skill</label><select id="filter-skill" value={filters.skill_id} onChange={(event) => setFilters({ ...filters, skill_id: event.target.value })}><option value="">Any skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></div>
         <Field id="filter-date" label="Date" type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
         <Field id="filter-payment" label="Minimum payment (LKR)" type="number" min="0" step="0.01" value={filters.min_payment} onChange={(event) => setFilters({ ...filters, min_payment: event.target.value })} />
-        <div className="filter-actions"><Button type="submit">Find shifts</Button><Button type="button" variant="secondary" onClick={clearFilters}>Clear</Button></div>
+        <div className="filter-actions"><Button type="submit"><FontAwesomeIcon icon={faMagnifyingGlass} /> Find shifts</Button><Button type="button" variant="secondary" onClick={clearFilters}>Clear</Button></div>
       </form>
       {!loading && !error && <p className="results-summary" role="status">{shifts.length} open {shifts.length === 1 ? 'shift' : 'shifts'} found</p>}
       <DataState loading={loading} error={error} onRetry={retry} empty={shifts.length === 0} emptyMessage="No open shifts match these filters." emptyAction={<Button type="button" variant="secondary" onClick={clearFilters}>Clear filters</Button>}>

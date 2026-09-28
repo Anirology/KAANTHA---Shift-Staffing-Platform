@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { api, clearToken, getBusinessId, getToken, saveBusinessId, saveToken } from './services/api'
 import { Navigation } from './components/Navigation'
 import { PageLayout } from './components/PageLayout'
+import { ShiftCreateModal } from './components/ShiftCreateModal'
 import { PageGuide } from './components/PageGuide'
 import { StatusMessage } from './components/StatusMessage'
 import { Login } from './pages/Login'
@@ -43,15 +44,14 @@ function guideFor(route) {
     '/worker': ['Browse shifts', 'Use the filters to narrow the list, then open a shift to check its requirements before applying.'],
     '/worker/applications': ['My applications', 'PENDING means the business is reviewing it. ACCEPTED shifts are confirmed work.'],
     '/worker/profile': ['Worker profile', 'Keep your skills and dated availability current so businesses can make informed decisions.'],
-    '/worker/ratings': ['My ratings', 'Businesses can leave one rating after a shift is completed. Use feedback to build your work history.'],
+    '/worker/ratings': ['My ratings', 'Businesses can rate your work after marking you present for a shift. Use feedback to build your work history.'],
     '/business': ['Manage shifts', 'Review staffing at a glance. Applicants is the fastest route to accepting workers and recording attendance.'],
     '/business/accounts': ['Businesses', 'Create and switch business profiles here. Every shift and report stays with the selected business.'],
-    '/business/shifts/new': ['Create a shift', 'Add the required skill, time, capacity and payment. Workers will see the shift once it is open.'],
-    '/business/shifts/import': ['CSV import', 'Download or follow the required column format, then review the result summary for any rejected rows.'],
+    '/business/shifts/import': ['CSV import', 'Upload a shift CSV using the required columns, then review the result summary for any rejected rows.'],
     '/business/reports': ['Reports', 'Choose a report and optional date range, then download the same filtered information.'],
     details: ['Shift details', 'Check the full shift information here before applying or making business changes.'],
     edit: ['Edit shift', 'You can update active shifts, but accepted staffing and completed work remain protected.'],
-    applicants: ['Applicants', 'Accepting runs skill, overlap and capacity checks. Mark attendance before completing the shift.'],
+    applicants: ['Applicants', 'Accepting runs skill, overlap and capacity checks. Rate a worker once you have marked them present.'],
   }
   return guides[route.path]
 }
@@ -98,6 +98,12 @@ export default function App() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    const refreshAccount = () => api.me().then((user) => setAccount(user)).catch(() => {})
+    window.addEventListener('shiftly:account-updated', refreshAccount)
+    return () => window.removeEventListener('shiftly:account-updated', refreshAccount)
+  }, [])
+
   function navigate(destination) {
     window.location.hash = destination
     setPath(destination)
@@ -136,7 +142,8 @@ export default function App() {
   }
 
   const route = routeFor(path)
-  const guide = account ? guideFor(route) : null
+  const createShiftModal = route.path === '/business/shifts/new' && account?.role === 'BUSINESS'
+  const guide = account && !createShiftModal ? guideFor(route) : null
   let content
   if (checking) {
     content = <p role="status">Checking your session…</p>
@@ -150,7 +157,7 @@ export default function App() {
     content = <WorkerProfile />
   } else if (route.path === '/worker/ratings') {
     content = <MyRatings />
-  } else if (route.path === '/business') {
+  } else if (route.path === '/business' || createShiftModal) {
     content = <ManageShifts key={activeBusinessId} businessName={account.businesses.find((business) => business.id === activeBusinessId)?.business_name} onNavigate={navigate} />
   } else if (route.path === '/business/accounts') {
     content = <BusinessAccounts businesses={account.businesses} activeBusinessId={activeBusinessId} onSelect={selectBusiness} onAdd={addBusiness} />
@@ -158,7 +165,7 @@ export default function App() {
     content = <ImportShifts key={activeBusinessId} />
   } else if (route.path === '/business/reports') {
     content = <Reports key={activeBusinessId} />
-  } else if (route.path === '/business/shifts/new' || route.path === 'edit') {
+  } else if (route.path === 'edit') {
     content = <ShiftForm key={`${activeBusinessId}-${route.id || 'new'}`} shiftId={route.id} onNavigate={navigate} />
   } else if (route.path === 'details') {
     content = <ShiftDetails key={`${route.role}-${activeBusinessId}-${route.id}`} shiftId={route.id} accountRole={route.role} onNavigate={navigate} />
@@ -178,6 +185,7 @@ export default function App() {
       <PageLayout dashboard={Boolean(account && route.role)} navigation={<Navigation account={account} activeBusinessId={activeBusinessId} onSelectBusiness={selectBusiness} activePath={path} onNavigate={navigate} onLogout={logout} />}>
       {sessionError && <StatusMessage type="error">{sessionError}</StatusMessage>}
       {content}
+      {createShiftModal && <ShiftCreateModal onClose={() => navigate('/business')}><ShiftForm onNavigate={navigate} isModal onClose={() => navigate('/business')} /></ShiftCreateModal>}
       {guide && <PageGuide key={route.path} guideKey={route.path} title={guide[0]}>{guide[1]}</PageGuide>}
     </PageLayout>
   )

@@ -14,7 +14,6 @@
 .page-shell { max-width: 1120px; margin: auto; padding: 56px 24px 72px; }
 .dashboard-shell { position: relative; }
 html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-shell) { min-height: 100%; background-color: #e7f0ef; }
-#root:has(.dashboard-shell) { background-image: url('/dashboard-doodle.png'); background-repeat: no-repeat; background-position: center 72px; background-size: 100% auto; background-attachment: fixed; }
 .auth-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 450px); align-items: center; gap: clamp(32px, 7vw, 110px); }
 .intro-eyebrow { color: #0e8f88; font-weight: 800; text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; }
 .intro h1 { color: #17313a; font-size: clamp(2.4rem, 5vw, 4.25rem); line-height: 1.07; letter-spacing: -.04em; margin: 18px 0 20px; }
@@ -328,4 +327,144 @@ html:has(.public-site-header), body:has(.public-site-header), #root:has(.public-
   .landing-worker-jobs { top: auto; right: 52%; bottom: 92px; width: 38%; }
   .landing-business-card::after { background: linear-gradient(180deg, rgba(8, 46, 62, .98) 0%, rgba(8, 46, 62, .84) 55%, transparent 100%); }
   .landing-dashboard-image { right: -18%; width: 114%; height: 70%; }
+}
+
+/* Shared minimal workspace dashboard inspired by the supplied Shiftly reference. */
+html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-shell) { min-height: 100%; background: #eef8f7; }
+.app-sidebar { position: fixed; z-index: 30; inset: 0 auto 0 0; width: 256px; display: flex; flex-direction: column; padding: 27px 17px 20px; color: #efffff; background: linear-gradient(165deg, #075265, #063b50 65%, #082f47); box-shadow: 12px 0 34px rgba(3, 52, 69, .10); }
+.sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 0 14px 27px; color: #fff; text-decoration: none; font-size: 1.45rem; font-weight: 800; letter-spacing: .02em; }
+.sidebar-brand img { width: 36px; height: 36px; object-fit: contain; }
+.sidebar-workspace { display: grid; gap: 7px; margin: 0 0 20px; padding: 0 8px; color: #a8d0d4; font-size: .65rem; font-weight: 800; letter-spacing: .13em; }
+.sidebar-workspace select { width: 100%; min-height: 42px; padding: 0 10px; border: 1px solid rgba(198, 236, 234, .25); border-radius: 9px; color: #f5ffff; background: rgba(255,255,255,.09); font: inherit; font-size: .82rem; letter-spacing: 0; }
+.sidebar-workspace option { color: #17313a; }
+.sidebar-nav { display: grid; gap: 8px; }
+.sidebar-link { display: flex; align-items: center; gap: 15px; min-height: 51px; padding: 0 16px; border-radius: 11px; color: #e2f3f4; text-decoration: none; font-size: .91rem; font-weight: 600; transition: background .15s ease, color .15s ease; }
+.sidebar-link svg { width: 19px; color: #b7e0e1; }
+.sidebar-link:hover, .sidebar-link[aria-current="page"] { color: #fff; background: rgba(98, 196, 199, .24); }
+.sidebar-link[aria-current="page"] { box-shadow: inset 3px 0 #67d6cf; }
+.sidebar-account { display: grid; gap: 12px; margin-top: auto; padding: 16px 4px 0; border-top: 1px solid rgba(212, 242, 241, .22); }
+.sidebar-profile { display: flex; align-items: center; gap: 11px; min-width: 0; padding: 2px 5px; border: 0; color: inherit; text-align: left; background: none; cursor: pointer; }
+.sidebar-profile-copy { display: grid; min-width: 0; gap: 3px; }
+.sidebar-profile-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .87rem; }
+.sidebar-profile-copy small { color: #a8d0d4; font-size: .73rem; }
+.sidebar-logout { display: flex; align-items: center; gap: 14px; min-height: 43px; padding: 0 14px; border: 0; border-radius: 9px; color: #d7ecee; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.sidebar-logout:hover { background: rgba(255,255,255,.09); color: white; }
+.sidebar-logout svg { width: 18px; }
+.app-sidebar ~ .page-shell.dashboard-shell { margin-top: 0; }
+.page-shell.dashboard-shell .status-message { position: relative; z-index: 2; }
+.page-shell.dashboard-shell { width: auto; max-width: none; min-height: 100vh; margin: 0 0 0 256px; padding: 40px clamp(24px, 4.2vw, 68px) 72px; }
+.dashboard-shell .screen { width: min(100%, 1440px); margin: 0 auto; }
+.dashboard-shell .screen-heading { align-items: center; margin-bottom: 27px; }
+.dashboard-shell .screen-heading h1, .dashboard-shell .dashboard-hero h1 { margin: 9px 0 5px; color: #102342; font-size: clamp(2.25rem, 4vw, 3.4rem); letter-spacing: -.045em; line-height: 1.04; }
+.dashboard-shell .screen-heading p, .dashboard-shell .dashboard-hero p { color: #58799b; font-size: 1.04rem; }
+.dashboard-shell .intro-eyebrow { color: #008f8a; letter-spacing: .15em; }
+.dashboard-hero { position: relative; display: flex; align-items: center; min-height: 204px; margin: -2px 0 15px; overflow: hidden; }
+.dashboard-hero-copy { position: relative; z-index: 2; padding: 12px 0; }
+.worker-hero-art { position: absolute; inset: 0 0 0 auto; width: min(55%, 570px); overflow: hidden; }
+.hero-soft-shape { position: absolute; right: 3%; top: -54%; width: 77%; height: 180%; border-radius: 50%; background: linear-gradient(140deg, rgba(194, 245, 232, .15), rgba(129, 229, 207, .85)); transform: rotate(-13deg); }
+.worker-hero-art img { position: absolute; right: 4%; bottom: -20px; width: min(85%, 400px); height: 108%; object-fit: contain; object-position: bottom; }
+.hero-calendar { position: absolute; z-index: 1; left: 23%; top: 31%; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 15px; color: #008f8a; background: white; box-shadow: 0 9px 28px rgba(13, 105, 113, .13); font-size: 1.25rem; }
+.dashboard-shell .filter-panel { position: relative; z-index: 3; grid-template-columns: repeat(4, minmax(100px, 1fr)) auto; gap: 15px; margin-bottom: 20px; padding: 19px; border: 1px solid rgba(255,255,255,.9); border-radius: 15px; box-shadow: 0 13px 32px rgba(31, 103, 117, .07); }
+.dashboard-shell .field { color: #132849; }
+.dashboard-shell .field input, .dashboard-shell .field select, .dashboard-shell .rating-form input, .dashboard-shell .rating-form select { border-color: #d5e0ed; border-radius: 9px; }
+.dashboard-shell .button { min-height: 44px; border-radius: 9px; background: #008b89; box-shadow: 0 5px 12px rgba(0, 133, 133, .14); }
+.dashboard-shell .button:hover:not(:disabled) { background: #007675; }
+.dashboard-shell .button-secondary { color: #18304f; border-color: #d2e0e9; background: white; box-shadow: none; }
+.dashboard-shell .filter-actions { display: flex; align-items: end; gap: 8px; }
+.dashboard-shell .results-summary { margin: 20px 0 12px; color: #456980; font-weight: 700; }
+.dashboard-shell .panel, .dashboard-shell .filter-panel, .dashboard-shell .shift-card, .dashboard-shell .applicant-card, .dashboard-shell .application-card, .dashboard-shell .data-state { border: 1px solid rgba(255,255,255,.96); border-radius: 15px; box-shadow: 0 10px 27px rgba(28, 96, 112, .055); }
+.dashboard-shell .panel { padding: 24px; }
+.dashboard-shell .panel h2, .dashboard-shell .applicants-section h2 { color: #132849; }
+.dashboard-shell .card-list { gap: 14px; }
+.dashboard-shell .shift-result { padding-top: 0; }
+.dashboard-shell .shift-result .shift-card { min-height: 142px; padding: 20px 22px; }
+.dashboard-shell .shift-card { gap: 18px; }
+.dashboard-shell .shift-card-main { position: relative; display: grid; grid-template-columns: 78px minmax(0, 1fr); column-gap: 20px; align-items: center; }
+.dashboard-shell .shift-business-photo { grid-column: 1; grid-row: 1 / 4; display: grid; place-items: center; width: 78px; height: 84px; overflow: hidden; border-radius: 12px; color: #047d7c; background: #e3f5f2; font-size: 1.45rem; font-weight: 800; }
+.dashboard-shell .shift-business-photo img { width: 100%; height: 100%; object-fit: cover; }
+.dashboard-shell .shift-card-top { grid-column: 2; gap: 12px; }
+.dashboard-shell .shift-card h2 { color: #102342; font-size: 1.18rem; }
+.dashboard-shell .shift-card-main > p { grid-column: 2; margin: 4px 0 9px; color: #6382a2; }
+.dashboard-shell .facts { grid-column: 2; display: flex; flex-wrap: wrap; margin-top: 1px; }
+.dashboard-shell .facts > div { min-width: 126px; padding: 1px 15px; border-right: 1px solid #dce7ef; }
+.dashboard-shell .facts > div:first-child { padding-left: 0; }
+.dashboard-shell .facts dt { display: flex; align-items: center; gap: 7px; color: #6884a0; font-size: .61rem; text-transform: uppercase; letter-spacing: .07em; }
+.dashboard-shell .facts dt svg { color: #1b5077; font-size: .84rem; }
+.dashboard-shell .facts dd { margin-top: 4px; color: #162b4a; font-weight: 700; }
+.dashboard-shell .chip, .dashboard-shell .match-label { border-radius: 30px; }
+.dashboard-shell .match-label { background: #dbf7f3; color: #008b89; }
+.dashboard-shell .skill-panel { display: grid; grid-template-columns: 1fr minmax(240px, .8fr); align-items: center; gap: 16px; }
+.avatar { flex: 0 0 auto; display: grid; place-items: center; width: 47px; height: 47px; overflow: hidden; border: 2px solid rgba(224, 249, 247, .9); border-radius: 50%; color: #087d7b; background: #c9efea; font-weight: 800; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.sidebar-avatar { width: 43px; height: 43px; }
+.applicant-identity { display: flex; align-items: center; gap: 13px; }
+.applicant-identity h3 { margin: 0; }
+.photo-picker { display: flex; align-items: center; gap: 14px; margin: 18px 0; }
+.photo-picker-avatar { width: 68px; height: 68px; font-size: 1.35rem; }
+.photo-picker-actions p { margin: 4px 0 9px; color: #718496; font-size: .78rem; }
+.photo-picker-actions > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+.dashboard-shell .business-profile-card { border: 1px solid #e5eeef; border-radius: 14px; background: white; box-shadow: 0 8px 25px rgba(28, 96, 112, .06); }
+.business-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.business-profile-card .photo-picker { grid-column: 1 / -1; margin: 5px 0; }
+.rated-badge { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 9px; color: #087d7b; background: #ddf5f1; font-weight: 700; }
+.shift-modal-backdrop { position: fixed; z-index: 100; inset: 0; display: grid; background: rgba(5, 30, 44, .55); backdrop-filter: blur(5px); }
+.shift-modal { position: relative; width: 100%; height: 100%; overflow: auto; border: 0; border-radius: 0; background: #f4fbfa; box-shadow: 0 24px 90px rgba(1, 24, 38, .3); outline: none; }
+.shift-modal .narrow-screen { max-width: 940px; padding: 34px clamp(20px, 5vw, 56px) 50px; }
+.shift-modal .screen { align-content: start; gap: 20px; }
+.shift-modal .screen-heading h1 { padding-right: 42px; }
+.shift-modal-close { position: sticky; z-index: 2; top: 14px; float: right; display: grid; place-items: center; width: 40px; height: 40px; margin: 14px 14px -54px 0; border: 1px solid #dce8e8; border-radius: 50%; color: #18304f; background: white; font-size: 1.65rem; line-height: 1; }
+.shift-modal-close:hover { background: #e9f7f5; }
+.shift-modal .shift-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.shift-modal .shift-form .shift-description-field, .shift-modal .shift-form .status, .shift-modal .shift-form .form-actions { grid-column: 1 / -1; }
+.shift-modal .shift-form .form-actions { position: sticky; bottom: -1px; padding: 14px 0 0; background: #f4fbfa; }
+.dashboard-shell .application-card, .dashboard-shell .applicant-card { background: white; }
+.dashboard-shell .report-tab { border-color: #d9e8e8; border-radius: 9px; }
+.dashboard-shell .report-tab.active { border-color: #008b89; background: #008b89; }
+.dashboard-shell .status-message { border-radius: 10px; }
+@media (max-width: 1100px) {
+  .page-shell.dashboard-shell { padding-inline: 28px; }
+  .dashboard-shell .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-shell .shift-card-main { grid-template-columns: 64px minmax(0,1fr); column-gap: 14px; }
+  .dashboard-shell .shift-business-photo { width: 64px; height: 68px; }
+  .dashboard-shell .facts > div { min-width: 110px; }
+}
+@media (max-width: 760px) {
+  .app-sidebar { position: relative; inset: auto; width: 100%; padding: 12px 14px; }
+  .sidebar-brand { padding: 0 7px 11px; font-size: 1.1rem; }
+  .sidebar-brand img { width: 30px; height: 30px; }
+  .sidebar-workspace { max-width: 100%; margin-bottom: 10px; }
+  .sidebar-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .sidebar-link { min-height: 42px; gap: 9px; padding: 0 9px; font-size: .79rem; }
+  .sidebar-link svg { width: 15px; }
+  .sidebar-account { grid-template-columns: 1fr auto; align-items: center; gap: 6px; margin-top: 10px; padding-top: 9px; }
+  .sidebar-profile-copy strong { max-width: 170px; }
+  .sidebar-logout { min-height: 38px; }
+  .page-shell.dashboard-shell { margin-left: 0; padding: 24px 16px 54px; }
+  .dashboard-hero { min-height: 172px; }
+  .worker-hero-art { width: 51%; opacity: .86; }
+  .hero-calendar { left: 7%; top: 30%; width: 42px; height: 42px; }
+  .dashboard-shell .screen-heading h1, .dashboard-shell .dashboard-hero h1 { font-size: 2.3rem; }
+  .dashboard-shell .shift-card { align-items: stretch; flex-direction: column; }
+  .dashboard-shell .shift-card-main { grid-template-columns: 54px minmax(0,1fr); column-gap: 12px; }
+  .dashboard-shell .shift-business-photo { width: 54px; height: 58px; }
+  .dashboard-shell .facts { gap: 8px 0; }
+  .dashboard-shell .facts > div { min-width: 50%; padding-left: 8px; }
+  .dashboard-shell .facts > div:nth-child(odd) { padding-left: 0; }
+  .dashboard-shell .skill-panel { grid-template-columns: 1fr; }
+}
+@media (max-width: 460px) {
+  .sidebar-nav { grid-template-columns: 1fr 1fr; }
+  .sidebar-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dashboard-shell .filter-panel { grid-template-columns: 1fr; }
+  .dashboard-shell .filter-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .worker-hero-art { width: 54%; opacity: .55; }
+  .photo-picker { align-items: flex-start; }
+}
+@media (max-width: 600px) {
+  .shift-modal-backdrop { padding: 0; }
+  .shift-modal { width: 100%; height: 100%; max-height: none; border: 0; border-radius: 0; }
+  .shift-modal .narrow-screen { padding: 27px 17px 40px; }
+  .shift-modal .shift-form { grid-template-columns: 1fr; }
+  .shift-modal .shift-form .field, .shift-modal .shift-form .shift-description-field, .shift-modal .shift-form .status, .shift-modal .shift-form .form-actions { grid-column: 1; }
 }

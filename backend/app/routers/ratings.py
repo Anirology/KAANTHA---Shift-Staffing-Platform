@@ -1,4 +1,4 @@
-"""Create and retrieve ratings for workers after completed shifts."""
+"""Create and retrieve ratings for workers marked present for a shift."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_business, get_worker
-from app.models import Application, ApplicationStatus, Business, Rating, Shift, ShiftStatus, Worker
+from app.models import Application, ApplicationStatus, AttendanceStatus, Business, Rating, Shift, Worker
 from app.schemas.schemas import RatingCreate, RatingResponse
 
 router = APIRouter(tags=["ratings"])
@@ -31,11 +31,11 @@ def create_rating(shift_id: int, worker_id: int, payload: RatingCreate, business
     shift = db.get(Shift, shift_id)
     if not shift or shift.business_id != business.id:
         raise HTTPException(404, "Shift not found.")
-    if shift.status != ShiftStatus.COMPLETED.value:
-        raise HTTPException(409, "Ratings are allowed only after the shift is completed.")
     accepted = db.scalar(select(Application).where(Application.shift_id == shift.id, Application.worker_id == worker_id, Application.status == ApplicationStatus.ACCEPTED.value))
     if not accepted:
         raise HTTPException(409, "Only a worker accepted for this shift can be rated.")
+    if not accepted.attendance or accepted.attendance.status != AttendanceStatus.PRESENT.value:
+        raise HTTPException(409, "Mark this worker present before submitting a rating.")
     existing = db.scalar(select(Rating).where(Rating.shift_id == shift.id, Rating.worker_id == worker_id, Rating.business_id == business.id))
     if existing:
         raise HTTPException(409, "This worker has already been rated for the shift.")

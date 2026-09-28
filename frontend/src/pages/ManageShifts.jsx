@@ -21,6 +21,11 @@ export function ManageShifts({ businessName, onNavigate }) {
     finally { setLoading(false) }
   }, [])
   useEffect(() => { const timer = window.setTimeout(load, 0); return () => window.clearTimeout(timer) }, [load])
+  useEffect(() => {
+    const refreshAfterChange = () => { setLoading(true); setError(''); load() }
+    window.addEventListener('shiftly:shifts-changed', refreshAfterChange)
+    return () => window.removeEventListener('shiftly:shifts-changed', refreshAfterChange)
+  }, [load])
   function retry() { setLoading(true); setError(''); load() }
 
   async function cancel(shift) {

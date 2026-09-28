@@ -2,6 +2,7 @@
 const configuredOrigin = import.meta.env.VITE_API_BASE_URL
 const origin = (configuredOrigin || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : window.location.origin)).replace(/\/+$/, '')
 const baseUrl = `${origin}/api/v1`
+export function photoUrl(path) { return path ? `${origin}${path.startsWith('/') ? path : `/${path}`}` : null }
 const tokenKey = 'shiftly_access_token'
 const businessKey = 'shiftly_business_id'
 
@@ -84,9 +85,13 @@ export const api = {
   me: (token) => request('/auth/me', { protectedRequest: true, token }),
   myBusinesses: () => request('/businesses/me', { protectedRequest: true }),
   createBusiness: (business_name) => request('/businesses', { method: 'POST', body: { business_name }, protectedRequest: true }),
+  uploadBusinessPhoto: (id, file) => { const form = new FormData(); form.append('file', file); return request(`/businesses/${id}/photo`, { method: 'PUT', body: form, protectedRequest: true }) },
+  removeBusinessPhoto: (id) => request(`/businesses/${id}/photo`, { method: 'DELETE', protectedRequest: true }),
   skills: () => request('/skills', { protectedRequest: true }),
   workerProfile: () => request('/workers/me', { protectedRequest: true }),
   updateWorkerProfile: (fields) => request('/workers/me', { method: 'PATCH', body: fields, protectedRequest: true }),
+  uploadWorkerPhoto: (file) => { const form = new FormData(); form.append('file', file); return request('/workers/me/photo', { method: 'PUT', body: form, protectedRequest: true }) },
+  removeWorkerPhoto: () => request('/workers/me/photo', { method: 'DELETE', protectedRequest: true }),
   addWorkerSkill: (skill_id) => request('/workers/me/skills', { method: 'POST', body: { skill_id }, protectedRequest: true }),
   removeWorkerSkill: (id) => request(`/workers/me/skills/${id}`, { method: 'DELETE', protectedRequest: true }),
   addAvailability: (fields) => request('/workers/me/availability', { method: 'POST', body: fields, protectedRequest: true }),
@@ -110,7 +115,6 @@ export const api = {
   rateWorker: (shiftId, workerId, fields) => request(`/shifts/${shiftId}/workers/${workerId}/rating`, { method: 'POST', body: fields, protectedRequest: true }),
   myRatings: () => request('/workers/me/ratings', { protectedRequest: true }),
   importShifts: (file) => { const form = new FormData(); form.append('file', file); return request('/shifts/import', { method: 'POST', body: form, protectedRequest: true }) },
-  importSkills: (file) => { const form = new FormData(); form.append('file', file); return request('/skills/import', { method: 'POST', body: form, protectedRequest: true }) },
   report: (kind, filters) => request(`/reports/${kind}${queryString(filters)}`, { protectedRequest: true }),
   exportReport: (kind, filters, format = 'csv') => request(`/reports/${kind}/export${format === 'pdf' ? '/pdf' : ''}${queryString(filters)}`, { protectedRequest: true, responseType: 'blob', accept: format === 'pdf' ? 'application/pdf' : 'text/csv' }),
 }

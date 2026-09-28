@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, aliased, joinedload
 
 from app.database import get_db
 from app.dependencies import get_business, get_current_user, get_worker, resolve_business
-from app.models import Application, ApplicationStatus, Attendance, AttendanceStatus, Business, Shift, ShiftStatus, Skill, User, Worker, WorkerSkill
+from app.models import Application, ApplicationStatus, Attendance, AttendanceStatus, Business, Rating, Shift, ShiftStatus, Skill, User, Worker, WorkerSkill
 from app.schemas.schemas import ApplicationResponse, AttendanceRequest, RejectionRequest, ShiftBase, ShiftPatch, ShiftResponse
 from app.routers.workers import application_response
 from app.services.acceptance import accept_application
@@ -19,7 +19,7 @@ router = APIRouter(tags=["shifts", "applications"])
 
 def shift_response(shift: Shift, db: Session) -> ShiftResponse:
     accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0
-    return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, role=shift.role, description=shift.description, date=shift.date, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
+    return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, business_photo_url=shift.business.photo_url, role=shift.role, description=shift.description, date=shift.date, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
 
 
 def owned_application(application_id: int, business: Business, db: Session) -> Application:
@@ -129,7 +129,9 @@ def shift_applications(shift_id: int, business: Business = Depends(get_business)
     shift = db.get(Shift, shift_id)
     if not shift: raise HTTPException(404, "Shift not found.")
     if shift.business_id != business.id: raise HTTPException(403, "You do not own this shift.")
-    return [application_response(item) for item in db.scalars(select(Application).where(Application.shift_id == shift_id)).all()]
+    applications = db.scalars(select(Application).where(Application.shift_id == shift_id)).all()
+    rated_workers = set(db.scalars(select(Rating.worker_id).where(Rating.shift_id == shift_id, Rating.business_id == business.id)).all())
+    return [application_response(item, rated=item.worker_id in rated_workers) for item in applications]
 
 
 @router.patch("/applications/{id}/accept", response_model=ApplicationResponse)
