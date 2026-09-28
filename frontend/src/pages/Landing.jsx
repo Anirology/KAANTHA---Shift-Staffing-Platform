@@ -1,3 +1,4 @@
+// Render the public Shiftly landing page and its registration entry points.
 import { Button } from '../components/Button'
 
 const steps = [

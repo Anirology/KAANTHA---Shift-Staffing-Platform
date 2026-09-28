@@ -1,3 +1,5 @@
+"""Define the database entities, relationships, and workflow status values."""
+
 from datetime import date, datetime, time
 from decimal import Decimal
 from enum import StrEnum

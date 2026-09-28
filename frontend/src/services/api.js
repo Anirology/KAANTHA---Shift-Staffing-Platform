@@ -1,3 +1,4 @@
+// Centralize API requests, session storage, authentication headers, and error messages.
 const configuredOrigin = import.meta.env.VITE_API_BASE_URL
 const origin = (configuredOrigin || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : window.location.origin)).replace(/\/+$/, '')
 const baseUrl = `${origin}/api/v1`
@@ -5,6 +6,7 @@ const tokenKey = 'shiftly_access_token'
 const businessKey = 'shiftly_business_id'
 
 function validOrigin(value) {
+  // Accept only a bare HTTP(S) origin; paths and credentials do not belong in this setting.
   try {
     const parsed = new URL(value)
     return ['http:', 'https:'].includes(parsed.protocol) && parsed.pathname === '/' && !parsed.search && !parsed.hash && !parsed.username && !parsed.password
@@ -63,6 +65,7 @@ async function request(path, { method = 'GET', body, protectedRequest = false, t
     throw new Error('Cannot connect to the Shiftly server. Check your connection and try again.')
   }
 
+  // Clear stale credentials centrally so every protected screen responds to expiry alike.
   if (response.status === 401 && protectedRequest) {
     clearToken()
     window.dispatchEvent(new Event('shiftly:session-expired'))

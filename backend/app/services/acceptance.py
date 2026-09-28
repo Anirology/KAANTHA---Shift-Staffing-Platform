@@ -1,3 +1,5 @@
+"""Validate and commit worker acceptance while protecting skill, schedule, and shift capacity rules."""
+
 from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, aliased
@@ -6,14 +8,14 @@ from app.models import Application, ApplicationStatus, Attendance, AttendanceSta
 
 
 def accept_application(db: Session, application_id: int, business_id: int) -> Application:
+    # Lock the application and shift so simultaneous requests cannot overfill a shift.
     application = db.execute(select(Application).where(Application.id == application_id).with_for_update()).scalar_one_or_none()
     if not application:
         raise HTTPException(404, "Application not found.")
     if application.shift.business_id != business_id:
         raise HTTPException(403, "You do not own this application.")
     shift = db.execute(select(Shift).where(Shift.id == application.shift_id).with_for_update()).scalar_one()
-    # Serialise acceptance decisions for a worker as well as for the shift.  This
-    # prevents concurrent requests for different shifts from double-booking them.
+    # Lock the worker too: concurrent requests on different shifts must not double-book them.
     db.execute(select(Worker).where(Worker.id == application.worker_id).with_for_update()).scalar_one()
     if application.status != ApplicationStatus.PENDING.value or shift.status != ShiftStatus.OPEN.value:
         raise HTTPException(409, "Only pending applications for open shifts can be accepted.")
@@ -30,6 +32,7 @@ def accept_application(db: Session, application_id: int, business_id: int) -> Ap
     ).with_for_update())
     if overlap:
         raise HTTPException(409, "Worker has an overlapping accepted shift.")
+    # Recount under the lock before changing status, then update both records together.
     accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0
     if accepted >= shift.required_workers:
         raise HTTPException(409, "Shift capacity is full.")

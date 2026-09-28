@@ -1,3 +1,4 @@
+// Present a shift summary and its available actions.
 import { formatMoney, formatShiftTime } from '../utils/format'
 
 export function ShiftCard({ shift, actions }) {

@@ -16,6 +16,7 @@ from app.database import engine
 
 
 def targets(connection):
+    # Database engines can represent a one-column uniqueness rule as either a constraint or an index.
     inspector = inspect(connection)
     constraints = [item["name"] for item in inspector.get_unique_constraints("businesses")
                    if item.get("name") and item.get("column_names") == ["user_id"]]
@@ -30,6 +31,7 @@ def apply_migration(connection) -> bool:
     if dialect not in {"mysql", "postgresql"} or not inspect(connection).has_table("businesses"):
         return False
     if dialect == "postgresql":
+        # Prevent two app instances from changing this schema rule concurrently.
         connection.execute(text("SELECT pg_advisory_xact_lock(73194281)"))
     elif dialect == "mysql":
         connection.execute(text("SELECT GET_LOCK('shiftly_multiple_businesses', 10)"))
@@ -45,6 +47,7 @@ def apply_migration(connection) -> bool:
                 if name not in constraints:
                     connection.execute(text(f"DROP INDEX {quote(name)}"))
         else:
+            # MySQL needs a normal index to keep the user foreign key supported after dropping uniqueness.
             existing = {item["name"] for item in inspect(connection).get_indexes("businesses")}
             if "ix_businesses_user_id" not in existing:
                 connection.execute(text("CREATE INDEX ix_businesses_user_id ON businesses (user_id)"))

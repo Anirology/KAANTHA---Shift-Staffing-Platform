@@ -1,3 +1,5 @@
+"""Handle account registration, password verification, login, and current-user details."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from pwdlib import PasswordHash
 from sqlalchemy import select

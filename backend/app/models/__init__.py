@@ -1,3 +1,5 @@
+"""Re-export database models and status enums for concise imports."""
+
 from app.models.models import (
     Application,
     ApplicationStatus,

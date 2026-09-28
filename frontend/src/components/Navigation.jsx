@@ -1,3 +1,4 @@
+// Render public or role-specific navigation and business switching controls.
 import { useState } from 'react'
 
 export function Navigation({ account, activeBusinessId, onSelectBusiness, activePath, onNavigate, onLogout }) {

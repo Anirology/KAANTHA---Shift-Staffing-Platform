@@ -18,12 +18,14 @@ STARTER_SKILLS = (
 
 
 def seed() -> int:
+    # Bring existing supported databases forward before create_all adds any new tables.
     with engine.begin() as connection:
         allow_multiple_businesses(connection)
         add_shift_description(connection)
     Base.metadata.create_all(bind=engine)
     created = 0
     with SessionLocal() as db:
+        # Add starter skills by name so repeated startup runs are safe and idempotent.
         existing_names = set(db.scalars(select(Skill.name)).all())
         for name, description in STARTER_SKILLS:
             if name not in existing_names:

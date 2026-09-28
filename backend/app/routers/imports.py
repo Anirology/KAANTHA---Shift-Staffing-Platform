@@ -1,3 +1,5 @@
+"""Validate CSV uploads and create shifts or shared skills with row-level results."""
+
 import csv
 import io
 from datetime import date, time
@@ -75,8 +77,10 @@ def import_skills(file: UploadFile = File(...), _: User = Depends(require_role(U
         raise HTTPException(400, "CSV file must be UTF-8 encoded.")
     if reader.fieldnames != ["skill_name", "description"]:
         raise HTTPException(400, "CSV headers must be skill_name,description.")
+    # Validate every row so the response can report row-level errors before inserting valid shifts.
     rows = list(reader)
     known = {name.lower() for name in db.scalars(select(Skill.name)).all()}
+    # Track newly accepted names as well, so duplicates within this file are counted.
     pending = []
     errors = []
     duplicates = 0

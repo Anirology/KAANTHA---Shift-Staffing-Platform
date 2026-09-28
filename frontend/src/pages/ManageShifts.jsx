@@ -1,3 +1,4 @@
+// Show the selected business?s shifts and management actions.
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { Button } from '../components/Button'

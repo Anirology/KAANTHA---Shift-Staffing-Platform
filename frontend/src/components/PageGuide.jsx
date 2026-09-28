@@ -1,3 +1,4 @@
+// Show dismissible, per-page guidance and remember the user?s choice.
 import { useState } from 'react'
 
 export function PageGuide({ guideKey, title, children }) {

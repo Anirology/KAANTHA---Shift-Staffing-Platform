@@ -1,3 +1,4 @@
+// Register a worker account and its initial profile.
 import { useState } from 'react'
 import { api } from '../services/api'
 import { AuthLayout } from '../components/AuthLayout'

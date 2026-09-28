@@ -1,3 +1,5 @@
+"""Create the FastAPI application, configure middleware, and register API routes."""
+
 import os
 from contextlib import asynccontextmanager
 

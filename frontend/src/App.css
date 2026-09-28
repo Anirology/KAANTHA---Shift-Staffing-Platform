@@ -1,3 +1,4 @@
+/* Define component-level layout and visual styles for the application screens. */
 #root { min-height: 100svh; }
 .site-header { background: #0f4c5c; color: white; }
 .nav-inner { max-width: 1120px; margin: auto; min-height: 72px; padding: 12px 24px; display: flex; align-items: center; gap: 36px; }

@@ -1,3 +1,5 @@
+"""Exercise end-to-end API behavior, ownership, shift rules, CSV imports, ratings, and reports."""
+
 from decimal import Decimal
 from uuid import uuid4
 

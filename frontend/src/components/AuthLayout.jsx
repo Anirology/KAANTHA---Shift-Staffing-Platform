@@ -1,3 +1,4 @@
+// Provide the shared layout for sign-in and registration screens.
 export function AuthLayout({ eyebrow, title, description, children }) {
   return (
     <div className="auth-grid">

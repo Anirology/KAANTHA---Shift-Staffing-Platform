@@ -1,3 +1,4 @@
+// Upload shift and skill CSV files and display row-level import results.
 import { useState } from 'react'
 import { api } from '../services/api'
 import { Button } from '../components/Button'

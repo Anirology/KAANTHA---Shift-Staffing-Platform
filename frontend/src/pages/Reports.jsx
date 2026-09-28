@@ -1,3 +1,4 @@
+// Filter, display, and export business staffing, worker, or attendance reports.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../services/api'
 import { Button } from '../components/Button'
@@ -26,6 +27,7 @@ export function Reports() {
   const [exportError, setExportError] = useState('')
   const requestId = useRef(0)
   const load = useCallback(async () => {
+    // Discard stale responses when the user changes report type or date filters mid-request.
     const id = ++requestId.current
     try { const data = await api.report(kind, filters); if (id === requestId.current) { setRows(data); setError('') } }
     catch (caught) { if (id === requestId.current) setError(caught.message) }

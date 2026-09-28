@@ -13,6 +13,7 @@ def apply_migration(connection) -> bool:
     if dialect not in {"mysql", "postgresql"} or not inspector.has_table("shifts"):
         return False
     if dialect == "postgresql":
+        # Serialize this additive migration across app instances.
         connection.execute(text("SELECT pg_advisory_xact_lock(73194282)"))
     elif dialect == "mysql":
         connection.execute(text("SELECT GET_LOCK('shiftly_shift_description', 10)"))

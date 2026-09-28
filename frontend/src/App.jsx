@@ -1,3 +1,4 @@
+// Choose the current hash route, restore the user session, and render the matching application screen.
 import { useEffect, useState } from 'react'
 import { api, clearToken, getBusinessId, getToken, saveBusinessId, saveToken } from './services/api'
 import { Navigation } from './components/Navigation'
@@ -26,6 +27,7 @@ function currentPath() {
 }
 
 function routeFor(path) {
+  // Resolve dynamic shift URLs before the fallback so detail actions receive their IDs.
   if (['/', '/login', '/register/worker', '/register/business'].includes(path)) return { path, role: null }
   if (['/worker', '/worker/applications', '/worker/profile', '/worker/ratings'].includes(path)) return { path, role: 'WORKER' }
   if (['/business', '/business/accounts', '/business/shifts/new', '/business/shifts/import', '/business/reports'].includes(path)) return { path, role: 'BUSINESS' }
@@ -79,6 +81,7 @@ export default function App() {
 
   useEffect(() => {
     if (!getToken()) return
+    // Ignore late session-check responses if the app unmounts before the request finishes.
     let active = true
     api.me()
       .then((user) => {

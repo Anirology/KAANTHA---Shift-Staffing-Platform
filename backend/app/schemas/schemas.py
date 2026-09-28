@@ -1,3 +1,5 @@
+"""Define validated request and response shapes for the HTTP API."""
+
 from datetime import date, time, datetime
 from decimal import Decimal
 from typing import Annotated

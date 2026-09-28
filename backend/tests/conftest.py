@@ -1,3 +1,5 @@
+"""Set up isolated SQLite databases and API clients for each test."""
+
 from collections.abc import Generator
 
 import pytest

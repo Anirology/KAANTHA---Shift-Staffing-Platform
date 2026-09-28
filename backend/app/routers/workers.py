@@ -1,3 +1,5 @@
+"""Manage worker profiles, skills, availability, applications, and worker-facing records."""
+
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session

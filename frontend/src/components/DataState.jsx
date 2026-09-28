@@ -1,3 +1,4 @@
+// Show loading, error, retry, and empty states around fetched data.
 import { Button } from './Button'
 import { StatusMessage } from './StatusMessage'
 

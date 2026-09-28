@@ -1,3 +1,5 @@
+"""Provide token authentication, role checks, and ownership-scoped account dependencies."""
+
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -13,11 +15,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 def create_access_token(user: User) -> str:
+    # Store the user ID and expiry in a signed token; no password or profile data is embedded.
     expires = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_minutes)
     return jwt.encode({"sub": str(user.id), "exp": expires}, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    # Use one generic authentication error so invalid IDs and tokens reveal no account details.
     credentials_error = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token.", headers={"WWW-Authenticate": "Bearer"})
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
@@ -51,6 +55,7 @@ def resolve_business(user: User, business_id: int | None, db: Session) -> Busine
         if len(user.businesses) == 1:
             return user.businesses[0]
         raise HTTPException(status_code=400, detail="Select a business using X-Business-Id.")
+    # The requested ID is accepted only when the signed-in user owns that business.
     business = db.get(Business, business_id)
     if business is None or business.user_id != user.id:
         raise HTTPException(status_code=403, detail="You do not own this business.")

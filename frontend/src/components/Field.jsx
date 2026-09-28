@@ -1,3 +1,4 @@
+// Render a labeled form field with consistent accessible markup.
 export function Field({ id, label, hint, ...props }) {
   return (
     <div className="field">

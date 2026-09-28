@@ -1,3 +1,4 @@
+// Format values consistently for display in the user interface.
 export function formatMoney(payment) {
   const value = String(payment ?? '')
   if (!/^\d+(\.\d{1,2})?$/.test(value)) return 'LKR —'

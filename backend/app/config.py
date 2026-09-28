@@ -1,3 +1,5 @@
+"""Load application settings from environment variables and enforce production requirements."""
+
 import os
 import secrets
 

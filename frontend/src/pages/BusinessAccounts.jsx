@@ -1,3 +1,4 @@
+// Switch between business profiles and create additional business workspaces.
 import { useState } from 'react'
 import { api } from '../services/api'
 import { Button } from '../components/Button'

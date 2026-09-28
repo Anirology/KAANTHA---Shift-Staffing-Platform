@@ -1,3 +1,4 @@
+// Show a worker?s applications and their current statuses.
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { Button } from '../components/Button'

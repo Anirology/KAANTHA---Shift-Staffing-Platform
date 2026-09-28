@@ -1,3 +1,4 @@
+// Show ratings received by the authenticated worker.
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { DataState } from '../components/DataState'

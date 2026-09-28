@@ -1,3 +1,4 @@
+// Collect credentials and start an authenticated session.
 import { useState } from 'react'
 import { api, clearToken } from '../services/api'
 import { AuthLayout } from '../components/AuthLayout'

@@ -1,3 +1,4 @@
+// Create or edit a shift with validated schedule, staffing, payment, and skill fields.
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../services/api'
 import { decimalString, toApiTime } from '../utils/format'

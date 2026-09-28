@@ -1,3 +1,5 @@
+"""Build filtered business reports and export matching data as CSV or PDF."""
+
 import csv
 import io
 from datetime import date, datetime
@@ -42,6 +44,7 @@ REPORTS = {
 
 
 def filtered_shifts(business_id: int, from_date: date | None, to_date: date | None, db: Session):
+    # Scope results to the selected business before applying the optional date range.
     if from_date and to_date and from_date > to_date:
         raise HTTPException(422, "from_date must be on or before to_date.")
     query = select(Shift).where(Shift.business_id == business_id)
@@ -129,6 +132,7 @@ def export_pdf(kind: str, rows, business: Business, from_date: date | None, to_d
         ]))
         story.append(table)
 
+    # Reuse the same footer callback so page numbers and branding appear on every page.
     def footer(canvas, doc):
         canvas.saveState()
         canvas.setStrokeColor(colors.HexColor("#9BCFC9")); canvas.line(15 * mm, 11 * mm, 282 * mm, 11 * mm)

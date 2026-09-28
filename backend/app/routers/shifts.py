@@ -1,3 +1,5 @@
+"""Manage shift listings, business shift actions, applications, attendance, and completion."""
+
 from datetime import date
 from decimal import Decimal
 
@@ -82,6 +84,7 @@ def update_shift(shift_id: int, data: ShiftPatch, business: Business = Depends(g
     if start >= end: raise HTTPException(422, "start_time must be before end_time")
     proposed_date = values.get("date", shift.date)
     proposed_skill = values.get("required_skill_id", shift.required_skill_id)
+    # Editing an active shift must not invalidate confirmed workers or double-book them.
     other_shift = aliased(Shift)
     for application in accepted_applications:
         has_skill = db.scalar(select(WorkerSkill.worker_id).where(WorkerSkill.worker_id == application.worker_id, WorkerSkill.skill_id == proposed_skill))
