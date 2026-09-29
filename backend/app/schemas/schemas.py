@@ -63,7 +63,6 @@ class BusinessResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     business_name: str
-    photo_url: str | None = None
 
 
 class MeResponse(BaseModel):
@@ -74,7 +73,6 @@ class MeResponse(BaseModel):
     business_id: int | None
     businesses: list[BusinessResponse]
     worker_name: str | None = None
-    worker_photo_url: str | None = None
 
 
 class SkillResponse(BaseModel):
@@ -114,7 +112,6 @@ class WorkerResponse(BaseModel):
     id: int
     user_id: int
     name: str
-    photo_url: str | None = None
     skills: list[SkillResponse]
     availability: list[AvailabilityResponse]
 
@@ -169,7 +166,6 @@ class ShiftResponse(BaseModel):
     id: int
     business_id: int
     business_name: str
-    business_photo_url: str | None = None
     role: str
     description: str | None
     date: date
@@ -195,7 +191,6 @@ class ApplicationResponse(BaseModel):
     applied_at: datetime
     attendance_status: AttendanceStatus | None
     rejection_reason: str | None
-    worker_photo_url: str | None = None
     rated: bool = False
 
 
@@ -274,7 +269,6 @@ class RatingResponse(BaseModel):
     worker_id: int
     business_id: int
     business_name: str
-    business_photo_url: str | None = None
     shift_role: str
     score: int
     review: str | None

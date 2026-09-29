@@ -380,8 +380,7 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
 .dashboard-shell .shift-result .shift-card { min-height: 142px; padding: 20px 22px; }
 .dashboard-shell .shift-card { gap: 18px; }
 .dashboard-shell .shift-card-main { position: relative; display: grid; grid-template-columns: 78px minmax(0, 1fr); column-gap: 20px; align-items: center; }
-.dashboard-shell .shift-business-photo { grid-column: 1; grid-row: 1 / 4; display: grid; place-items: center; width: 78px; height: 84px; overflow: hidden; border-radius: 12px; color: #047d7c; background: #e3f5f2; font-size: 1.45rem; font-weight: 800; }
-.dashboard-shell .shift-business-photo img { width: 100%; height: 100%; object-fit: cover; }
+.dashboard-shell .shift-business-badge { grid-column: 1; grid-row: 1 / 4; display: grid; place-items: center; width: 78px; height: 84px; overflow: hidden; border-radius: 12px; color: #047d7c; background: #e3f5f2; font-size: 1.45rem; font-weight: 800; }
 .dashboard-shell .shift-card-top { grid-column: 2; gap: 12px; }
 .dashboard-shell .shift-card h2 { color: #102342; font-size: 1.18rem; }
 .dashboard-shell .shift-card-main > p { grid-column: 2; margin: 4px 0 9px; color: #6382a2; }
@@ -395,18 +394,11 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
 .dashboard-shell .match-label { background: #dbf7f3; color: #008b89; }
 .dashboard-shell .skill-panel { display: grid; grid-template-columns: 1fr minmax(240px, .8fr); align-items: center; gap: 16px; }
 .avatar { flex: 0 0 auto; display: grid; place-items: center; width: 47px; height: 47px; overflow: hidden; border: 2px solid rgba(224, 249, 247, .9); border-radius: 50%; color: #087d7b; background: #c9efea; font-weight: 800; }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
 .sidebar-avatar { width: 43px; height: 43px; }
 .applicant-identity { display: flex; align-items: center; gap: 13px; }
 .applicant-identity h3 { margin: 0; }
-.photo-picker { display: flex; align-items: center; gap: 14px; margin: 18px 0; }
-.photo-picker-avatar { width: 68px; height: 68px; font-size: 1.35rem; }
-.photo-picker-actions p { margin: 4px 0 9px; color: #718496; font-size: .78rem; }
-.photo-picker-actions > div { display: flex; flex-wrap: wrap; gap: 8px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
 .dashboard-shell .business-profile-card { border: 1px solid #e5eeef; border-radius: 14px; background: white; box-shadow: 0 8px 25px rgba(28, 96, 112, .06); }
-.business-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
-.business-profile-card .photo-picker { grid-column: 1 / -1; margin: 5px 0; }
 .rated-badge { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 9px; color: #087d7b; background: #ddf5f1; font-weight: 700; }
 .shift-modal-backdrop { position: fixed; z-index: 100; inset: 0; display: grid; background: rgba(5, 30, 44, .55); backdrop-filter: blur(5px); }
 .shift-modal { position: relative; width: 100%; height: 100%; overflow: auto; border: 0; border-radius: 0; background: #f4fbfa; box-shadow: 0 24px 90px rgba(1, 24, 38, .3); outline: none; }
@@ -449,7 +441,7 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
   .page-shell.dashboard-shell { padding-inline: 28px; }
   .dashboard-shell .filter-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashboard-shell .shift-card-main { grid-template-columns: 64px minmax(0,1fr); column-gap: 14px; }
-  .dashboard-shell .shift-business-photo { width: 64px; height: 68px; }
+  .dashboard-shell .shift-business-badge { width: 64px; height: 68px; }
   .dashboard-shell .facts > div { min-width: 110px; }
 }
 @media (max-width: 760px) {
@@ -470,7 +462,7 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
   .dashboard-shell .screen-heading h1, .dashboard-shell .dashboard-hero h1 { font-size: 2.3rem; }
   .dashboard-shell .shift-card { align-items: stretch; flex-direction: column; }
   .dashboard-shell .shift-card-main { grid-template-columns: 54px minmax(0,1fr); column-gap: 12px; }
-  .dashboard-shell .shift-business-photo { width: 54px; height: 58px; }
+  .dashboard-shell .shift-business-badge { width: 54px; height: 58px; }
   .dashboard-shell .facts { gap: 8px 0; }
   .dashboard-shell .facts > div { min-width: 50%; padding-left: 8px; }
   .dashboard-shell .facts > div:nth-child(odd) { padding-left: 0; }
@@ -482,7 +474,6 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
   .dashboard-shell .filter-panel { grid-template-columns: 1fr; }
   .dashboard-shell .filter-actions { display: grid; grid-template-columns: 1fr 1fr; }
   .worker-hero-art { width: 54%; opacity: .55; }
-  .photo-picker { align-items: flex-start; }
 }
 @media (max-width: 600px) {
   .shift-modal-backdrop { padding: 0; }

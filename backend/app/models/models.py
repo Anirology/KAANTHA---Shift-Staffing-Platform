@@ -4,8 +4,7 @@ from datetime import date, datetime, time
 from decimal import Decimal
 from enum import StrEnum
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, LargeBinary, Numeric, String, Text, Time, UniqueConstraint
-from sqlalchemy.dialects.mysql import MEDIUMBLOB
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String, Text, Time, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -51,33 +50,19 @@ class Worker(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
     name: Mapped[str] = mapped_column(String(100))
-    photo_data: Mapped[bytes | None] = mapped_column(LargeBinary().with_variant(MEDIUMBLOB(), "mysql"), nullable=True)
-    photo_content_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     user: Mapped[User] = relationship(back_populates="worker")
     skills: Mapped[list["Skill"]] = relationship(secondary="worker_skills", back_populates="workers")
     availability: Mapped[list["WorkerAvailability"]] = relationship(back_populates="worker", cascade="all, delete-orphan")
     applications: Mapped[list["Application"]] = relationship(back_populates="worker")
-
-    @property
-    def photo_url(self) -> str | None:
-        return f"/api/v1/workers/{self.id}/photo" if self.photo_data else None
-
 
 class Business(Base):
     __tablename__ = "businesses"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     business_name: Mapped[str] = mapped_column(String(150))
-    photo_data: Mapped[bytes | None] = mapped_column(LargeBinary().with_variant(MEDIUMBLOB(), "mysql"), nullable=True)
-    photo_content_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     user: Mapped[User] = relationship(back_populates="businesses")
     shifts: Mapped[list["Shift"]] = relationship(back_populates="business")
     ratings: Mapped[list["Rating"]] = relationship(back_populates="business")
-
-    @property
-    def photo_url(self) -> str | None:
-        return f"/api/v1/businesses/{self.id}/photo" if self.photo_data else None
-
 
 class Skill(Base):
     __tablename__ = "skills"

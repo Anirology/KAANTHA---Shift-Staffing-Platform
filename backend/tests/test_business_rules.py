@@ -1,6 +1,5 @@
 """Exercise end-to-end API behavior, ownership, shift rules, CSV imports, ratings, and reports."""
 
-import base64
 from decimal import Decimal
 from uuid import uuid4
 
@@ -106,35 +105,6 @@ def test_full_vertical_slice_reports_and_completion(api):
         assert pdf.status_code == 200
         assert pdf.headers["content-type"] == "application/pdf"
         assert pdf.content.startswith(b"%PDF")
-
-
-def test_worker_and_business_profile_photo_http_flow(api):
-    client, _ = api
-    worker = register_worker(client)
-    business = register_business(client)
-    worker_id = client.get("/api/v1/workers/me", headers=worker).json()["id"]
-    business_id = client.get("/api/v1/businesses/me", headers=business).json()[0]["id"]
-    png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jp5sAAAAASUVORK5CYII=")
-
-    worker_upload = client.put("/api/v1/workers/me/photo", headers=worker, files={"file": ("worker.png", png, "image/png")})
-    assert worker_upload.status_code == 200
-    worker_photo_path = f"/api/v1/workers/{worker_id}/photo"
-    assert worker_upload.json()["photo_url"] == worker_photo_path
-    assert client.get("/api/v1/workers/me", headers=worker).json()["photo_url"] == worker_photo_path
-    assert client.get(worker_photo_path).content == png
-    assert client.put("/api/v1/workers/me/photo", headers=business, files={"file": ("worker.png", png, "image/png")}).status_code == 403
-    assert client.delete("/api/v1/workers/me/photo", headers=worker).status_code == 204
-    assert client.get(worker_photo_path).status_code == 404
-
-    business_photo_path = f"/api/v1/businesses/{business_id}/photo"
-    business_upload = client.put(business_photo_path, headers=business, files={"file": ("business.png", png, "image/png")})
-    assert business_upload.status_code == 200
-    assert business_upload.json()["photo_url"] == business_photo_path
-    assert client.get("/api/v1/businesses/me", headers=business).json()[0]["photo_url"] == business_photo_path
-    assert client.get(business_photo_path).content == png
-    assert client.delete(business_photo_path, headers=worker).status_code == 403
-    assert client.delete(business_photo_path, headers=business).status_code == 204
-    assert client.get(business_photo_path).status_code == 404
 
 
 def test_roles_cross_business_ownership_missing_skill_and_capacity(api):

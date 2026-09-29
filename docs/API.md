@@ -503,3 +503,17 @@ DATABASE IMPACT: `shifts.duration_days` is a non-null integer defaulting to 1. E
 
 DOCUMENTATION IMPACT: Explain that `payment` is per day, `total_payment` is calculated, and acceptance covers the full consecutive date range.
 
+## SHARED CONTRACT CHANGE - profile photos removed (2026-09-29)
+
+OLD: Worker and business responses could include photo URLs, and upload/read/delete photo endpoints stored binary image data.
+
+NEW: Shiftly uses generated initial badges only. No account can upload, fetch, or remove a profile picture.
+
+BACKEND IMPACT: Photo endpoints, binary model properties, and photo response fields are removed.
+
+FRONTEND IMPACT: Photo pickers and image rendering are removed from worker profiles, business workspaces, navigation, shift cards, and applicant cards.
+
+DATABASE IMPACT: Existing legacy photo columns may remain harmlessly in an already-created database, but the application no longer reads or writes them. No destructive production column drop is performed automatically.
+
+DOCUMENTATION IMPACT: Do not demonstrate or document profile-picture functionality.
+

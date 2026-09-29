@@ -1,7 +1,6 @@
 // Render public navigation or the authenticated Shiftly workspace sidebar.
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRightFromBracket, faBriefcase, faBuilding, faChartColumn, faFileCirclePlus, faFileLines, faMagnifyingGlass, faStar, faUser } from '@fortawesome/free-solid-svg-icons'
-import { photoUrl } from '../services/api'
 
 const workerLinks = [
   { path: '/worker', label: 'Browse shifts', icon: faMagnifyingGlass },
@@ -34,7 +33,6 @@ export function Navigation({ account, activeBusinessId, onSelectBusiness, active
   const links = worker ? workerLinks : businessLinks
   const activeBusiness = account.businesses?.find((business) => business.id === activeBusinessId)
   const displayName = worker ? account.worker_name : activeBusiness?.business_name
-  const photo = photoUrl(worker ? account.worker_photo_url : activeBusiness?.photo_url)
 
   return (
     <aside className="app-sidebar" aria-label="Shiftly workspace navigation">
@@ -45,7 +43,7 @@ export function Navigation({ account, activeBusinessId, onSelectBusiness, active
       </nav>
       <div className="sidebar-account">
         <button className="sidebar-profile" type="button" onClick={() => onNavigate(worker ? '/worker/profile' : '/business/accounts')}>
-          <span className="avatar sidebar-avatar">{photo ? <img src={photo} alt="" /> : <span>{(displayName || account.email || '?').trim().slice(0, 1).toUpperCase()}</span>}</span>
+          <span className="avatar sidebar-avatar" aria-hidden="true"><span>{(displayName || account.email || '?').trim().slice(0, 1).toUpperCase()}</span></span>
           <span className="sidebar-profile-copy"><strong>{displayName || account.email}</strong><small>{worker ? 'Worker account' : 'Business account'}</small></span>
         </button>
         <button className="sidebar-logout" type="button" onClick={onLogout}><FontAwesomeIcon icon={faArrowRightFromBracket} aria-hidden="true" /><span>Log out</span></button>

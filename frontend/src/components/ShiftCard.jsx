@@ -2,7 +2,6 @@
 import { formatMoney, formatShiftTime } from '../utils/format'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendarDays, faClock, faCoins, faFileLines, faUsers } from '@fortawesome/free-solid-svg-icons'
-import { photoUrl } from '../services/api'
 
 function shiftDateLabel(shift) {
   if ((shift.duration_days || 1) === 1) return shift.date
@@ -15,7 +14,7 @@ export function ShiftCard({ shift, actions }) {
   return (
     <article className="shift-card">
       <div className="shift-card-main">
-        <div className="shift-business-photo">{shift.business_photo_url ? <img src={photoUrl(shift.business_photo_url)} alt="" /> : <span>{(shift.business_name || 'S').trim().slice(0, 1).toUpperCase()}</span>}</div>
+        <div className="shift-business-badge" aria-hidden="true"><span>{(shift.business_name || 'S').trim().slice(0, 1).toUpperCase()}</span></div>
         <div className="shift-card-top"><h2>{shift.role}</h2><span className={`chip chip-${shift.status?.toLowerCase()}`}>{shift.status}</span></div>
         <p>{shift.business_name || 'Your business'}</p>
         <dl className="facts">
