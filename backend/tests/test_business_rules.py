@@ -77,6 +77,13 @@ def test_full_vertical_slice_reports_and_completion(api):
     assert early_rating.status_code == 201
     applicants = client.get(f"/api/v1/shifts/{shift_id}/applications", headers=business).json()
     assert applicants[0]["rated"] is True
+    applicant_profile = client.get(f"/api/v1/shifts/{shift_id}/applicants/{accepted.json()['worker_id']}/profile", headers=business)
+    assert applicant_profile.status_code == 200
+    assert applicant_profile.json()["name"] == "Flow Worker"
+    assert applicant_profile.json()["rating_count"] == 1
+    assert applicant_profile.json()["average_rating"] == 5.0
+    assert applicant_profile.json()["skills"][0]["name"] == "Cashier"
+    assert applicant_profile.json()["ratings"][0]["review"] == "Present before completion."
     completed = client.patch(f"/api/v1/shifts/{shift_id}/complete", headers=business)
     assert completed.status_code == 200 and completed.json()["status"] == "COMPLETED"
     rating = client.post(f"/api/v1/shifts/{shift_id}/workers/{accepted.json()['worker_id']}/rating", headers=business, json={"score": 5, "review": "Reliable and punctual."})
@@ -242,6 +249,9 @@ def test_one_login_can_manage_two_businesses_without_cross_business_access(api):
 
     assert client.post("/api/v1/workers/me/skills", headers=worker, json={"skill_id": skill}).status_code == 201
     application = apply(client, worker, first_shift)
+    worker_id = client.get("/api/v1/workers/me", headers=worker).json()["id"]
+    assert client.get(f"/api/v1/shifts/{first_shift}/applicants/{worker_id}/profile", headers=second_headers).status_code == 403
+    assert client.get(f"/api/v1/shifts/{first_shift}/applicants/{worker_id}/profile", headers=worker).status_code == 403
     assert client.patch(f"/api/v1/applications/{application}/accept", headers=second_headers).status_code == 403
     assert client.patch(f"/api/v1/applications/{application}/accept", headers=worker).status_code == 403
     assert client.get("/api/v1/workers/me/applications", headers=worker).json()[0]["status"] == "PENDING"

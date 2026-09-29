@@ -276,6 +276,8 @@ When a shift already has accepted workers, editing its date, time, or required s
 
 | `GET /shifts/{shift\_id}/applications` | Owning BUSINESS | Path `shift\_id:int` | `200 Application\[]` | `403`, `404` |
 
+| `GET /shifts/{shift\_id}/applicants/{worker\_id}/profile` | Owning BUSINESS; worker applied to this shift | Path IDs; no body | `200 {id, name, skills, availability, average\_rating, rating\_count, ratings}` | `403` not owner/wrong role; `404` shift or applicant |
+
 | `PATCH /applications/{id}/accept` | Owning BUSINESS | Path `id:int`; no body | `200 Application` with `ACCEPTED` | `403`, `404`, `409` state, skill, overlap, or capacity |
 
 | `PATCH /applications/{id}/reject` | Owning BUSINESS | Path `id:int`; `{reason?:string}` | `200 Application` with `REJECTED` | `403`, `404`, `409` invalid state |

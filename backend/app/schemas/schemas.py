@@ -273,3 +273,13 @@ class RatingResponse(BaseModel):
     score: int
     review: str | None
     created_at: datetime
+
+
+class ApplicantProfileResponse(BaseModel):
+    id: int
+    name: str
+    skills: list[SkillResponse]
+    availability: list[AvailabilityResponse]
+    average_rating: float | None
+    rating_count: int
+    ratings: list[RatingResponse]

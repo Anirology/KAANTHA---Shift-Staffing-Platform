@@ -408,6 +408,13 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
 .sidebar-avatar { width: 43px; height: 43px; }
 .applicant-identity { display: flex; align-items: center; gap: 13px; }
 .applicant-identity h3 { margin: 0; }
+.applicant-profile-trigger { min-width: 250px; padding: 6px; border: 0; border-radius: 12px; color: inherit; background: transparent; text-align: left; cursor: pointer; transition: background .16s ease, box-shadow .16s ease; }
+.applicant-profile-trigger:hover { color: var(--navy-900); background: var(--mint-100); box-shadow: 0 0 0 5px var(--mint-100); }
+.applicant-profile-trigger:focus-visible { outline: 3px solid rgba(15, 148, 136, .32); outline-offset: 4px; }
+.applicant-profile-trigger > span:last-child { display: grid; gap: 3px; }
+.applicant-profile-trigger strong { color: var(--navy-900); font-size: 1rem; }
+.applicant-profile-trigger small { color: #678097; font-size: .78rem; font-style: normal; }
+.applicant-profile-trigger em { margin-top: 2px; color: var(--teal-700); font-size: .76rem; font-style: normal; font-weight: 800; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
 .dashboard-shell .business-profile-card { border: 1px solid #e5eeef; border-radius: 14px; background: white; box-shadow: 0 8px 25px rgba(28, 96, 112, .06); }
 .rated-badge { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 9px; color: #087d7b; background: #ddf5f1; font-weight: 700; }
@@ -421,6 +428,30 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
 .shift-modal .shift-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .shift-modal .shift-form .shift-description-field, .shift-modal .shift-form .status, .shift-modal .shift-form .form-actions { grid-column: 1 / -1; }
 .shift-modal .shift-form .form-actions { position: sticky; bottom: -1px; padding: 14px 0 0; background: #fff; }
+.applicant-profile-modal { width: min(900px, 100%); background: #f7fbfa; }
+.applicant-profile-content { padding: clamp(24px, 4vw, 46px); }
+.applicant-profile-content .data-state { min-height: 240px; }
+.applicant-profile-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 0 52px 24px 0; border-bottom: 1px solid #dceaea; }
+.applicant-profile-header h2 { margin: 5px 0 5px; color: var(--navy-900); font-size: clamp(1.65rem, 3vw, 2.25rem); }
+.applicant-profile-header p { margin: 0; color: #678097; }
+.applicant-profile-avatar { width: 64px; height: 64px; font-size: 1.35rem; }
+.applicant-rating-summary { display: grid; justify-items: end; gap: 4px; min-width: 130px; }
+.applicant-rating-summary strong { color: var(--teal-700); font-size: 2.15rem; line-height: 1; }
+.applicant-rating-summary span { color: #678097; font-size: .78rem; font-weight: 700; }
+.applicant-profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.applicant-profile-panel { padding: 19px; border: 1px solid #dceaea; border-radius: 14px; background: white; }
+.applicant-profile-panel h3 { margin: 0; color: var(--navy-900); font-size: 1rem; }
+.profile-availability-list { display: grid; gap: 9px; margin-top: 14px; }
+.profile-availability-list p { display: flex; justify-content: space-between; gap: 15px; margin: 0; padding-bottom: 9px; border-bottom: 1px solid #edf3f3; color: #678097; font-size: .82rem; }
+.profile-availability-list strong { color: var(--navy-800); }
+.applicant-rating-history { margin-top: 16px; }
+.profile-rating-list { display: grid; gap: 11px; margin-top: 15px; }
+.applicant-rating-card { display: grid; grid-template-columns: minmax(160px, .8fr) auto; gap: 8px 18px; padding: 14px; border: 1px solid #e1ecec; border-radius: 11px; background: #fbfdfd; }
+.applicant-rating-card div { display: grid; gap: 3px; }
+.applicant-rating-card div span { color: #678097; font-size: .78rem; }
+.applicant-rating-card p { grid-column: 1 / -1; margin: 0; color: #526a75; font-size: .84rem; }
+.muted-copy { margin: 14px 0 0; color: #678097; }
+.applicant-profile-footer { display: flex; justify-content: flex-end; margin-top: 18px; }
 .dashboard-shell .application-card, .dashboard-shell .applicant-card { background: white; }
 .dashboard-shell .report-tab { border-color: #d9e8e8; border-radius: 9px; }
 .dashboard-shell .report-tab { color: var(--navy-800); background: white; transition: color .16s ease, background .16s ease, border-color .16s ease; }
@@ -502,4 +533,10 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
   .shift-modal-close { top: 12px; right: 12px; }
   .shift-modal .shift-form { grid-template-columns: 1fr; }
   .shift-modal .shift-form .field, .shift-modal .shift-form .shift-description-field, .shift-modal .shift-form .status, .shift-modal .shift-form .form-actions { grid-column: 1; }
+  .applicant-profile-content { padding: 24px 16px; }
+  .applicant-profile-header { grid-template-columns: auto minmax(0, 1fr); padding-right: 38px; }
+  .applicant-rating-summary { grid-column: 1 / -1; justify-items: start; padding-top: 10px; }
+  .applicant-profile-grid { grid-template-columns: 1fr; }
+  .applicant-rating-card { grid-template-columns: 1fr; }
+  .applicant-rating-card p { grid-column: 1; }
 }

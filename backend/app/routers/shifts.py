@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, aliased, joinedload
 from app.database import get_db
 from app.dependencies import get_business, get_current_user, get_worker, resolve_business
 from app.models import Application, ApplicationStatus, Attendance, AttendanceStatus, Business, Rating, Shift, ShiftStatus, Skill, User, Worker, WorkerSkill
-from app.schemas.schemas import ApplicationResponse, AttendanceRequest, RejectionRequest, ShiftBase, ShiftPatch, ShiftResponse
+from app.schemas.schemas import ApplicantProfileResponse, ApplicationResponse, AttendanceRequest, RejectionRequest, ShiftBase, ShiftPatch, ShiftResponse
 from app.routers.workers import application_response
 from app.services.acceptance import accept_application
 from app.services.schedule import shift_end_date, shifts_overlap
@@ -141,6 +141,40 @@ def shift_applications(shift_id: int, business: Business = Depends(get_business)
     applications = db.scalars(select(Application).where(Application.shift_id == shift_id)).all()
     rated_workers = set(db.scalars(select(Rating.worker_id).where(Rating.shift_id == shift_id, Rating.business_id == business.id)).all())
     return [application_response(item, rated=item.worker_id in rated_workers) for item in applications]
+
+
+@router.get("/shifts/{shift_id}/applicants/{worker_id}/profile", response_model=ApplicantProfileResponse)
+def applicant_profile(shift_id: int, worker_id: int, business: Business = Depends(get_business), db: Session = Depends(get_db)):
+    shift = db.get(Shift, shift_id)
+    if not shift:
+        raise HTTPException(404, "Shift not found.")
+    if shift.business_id != business.id:
+        raise HTTPException(403, "You do not own this shift.")
+    application = db.scalar(select(Application).where(Application.shift_id == shift_id, Application.worker_id == worker_id))
+    if not application:
+        raise HTTPException(404, "Applicant not found for this shift.")
+    worker = application.worker
+    ratings = db.scalars(select(Rating).where(Rating.worker_id == worker.id).order_by(Rating.created_at.desc(), Rating.id.desc())).all()
+    average = round(sum(item.score for item in ratings) / len(ratings), 1) if ratings else None
+    return {
+        "id": worker.id,
+        "name": worker.name,
+        "skills": worker.skills,
+        "availability": worker.availability,
+        "average_rating": average,
+        "rating_count": len(ratings),
+        "ratings": [{
+            "id": item.id,
+            "shift_id": item.shift_id,
+            "worker_id": item.worker_id,
+            "business_id": item.business_id,
+            "business_name": item.business.business_name,
+            "shift_role": item.shift.role,
+            "score": item.score,
+            "review": item.review,
+            "created_at": item.created_at,
+        } for item in ratings],
+    }
 
 
 @router.patch("/applications/{id}/accept", response_model=ApplicationResponse)

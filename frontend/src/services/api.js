@@ -102,6 +102,7 @@ export const api = {
   cancelShift: (id) => request(`/shifts/${id}`, { method: 'DELETE', protectedRequest: true }),
   apply: (shiftId) => request(`/shifts/${shiftId}/applications`, { method: 'POST', protectedRequest: true }),
   applicants: (shiftId) => request(`/shifts/${shiftId}/applications`, { protectedRequest: true }),
+  applicantProfile: (shiftId, workerId) => request(`/shifts/${shiftId}/applicants/${workerId}/profile`, { protectedRequest: true }),
   myApplications: (filters = {}) => request(`/workers/me/applications${queryString(filters)}`, { protectedRequest: true }),
   acceptApplication: (id) => request(`/applications/${id}/accept`, { method: 'PATCH', protectedRequest: true }),
   rejectApplication: (id, reason) => request(`/applications/${id}/reject`, { method: 'PATCH', body: reason ? { reason } : {}, protectedRequest: true }),

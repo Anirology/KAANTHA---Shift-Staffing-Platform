@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { DataState } from '../components/DataState'
 import { ShiftCard } from '../components/ShiftCard'
 import { StatusMessage } from '../components/StatusMessage'
+import { ApplicantProfileModal } from '../components/ApplicantProfileModal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 
@@ -17,6 +18,10 @@ export function Applicants({ shiftId, onNavigate }) {
   const [feedback, setFeedback] = useState('')
   const [processingId, setProcessingId] = useState(null)
   const [ratingDrafts, setRatingDrafts] = useState({})
+  const [profileWorkerId, setProfileWorkerId] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileError, setProfileError] = useState('')
   const load = useCallback(async () => {
     try { const [record, list] = await Promise.all([api.shift(shiftId), api.applicants(shiftId)]); setShift(record); setApplicants(list); setError(''); return true }
     catch (caught) { setError(caught.message); return false }
@@ -33,6 +38,13 @@ export function Applicants({ shiftId, onNavigate }) {
   function updateRating(workerId, field, value) {
     setRatingDrafts((current) => ({ ...current, [workerId]: { score: 5, review: '', ...current[workerId], [field]: value } }))
   }
+  const openProfile = useCallback(async (workerId) => {
+    setProfileWorkerId(workerId); setProfile(null); setProfileError(''); setProfileLoading(true)
+    try { setProfile(await api.applicantProfile(shiftId, workerId)) }
+    catch (caught) { setProfileError(caught.message) }
+    finally { setProfileLoading(false) }
+  }, [shiftId])
+  function closeProfile() { setProfileWorkerId(null); setProfile(null); setProfileError('') }
   const incomplete = applicants.filter((item) => item.status === 'ACCEPTED').some((item) => !item.attendance_status || item.attendance_status === 'NOT_MARKED')
   const acceptedCount = applicants.filter((item) => item.status === 'ACCEPTED').length
   const canComplete = ['OPEN', 'FILLED'].includes(shift?.status) && acceptedCount > 0 && !incomplete
@@ -45,7 +57,7 @@ export function Applicants({ shiftId, onNavigate }) {
       <section className="applicants-section" aria-labelledby="applicants-heading"><div className="section-heading-row"><h2 id="applicants-heading">Applications</h2><span className="staffing-count">{acceptedCount} confirmed · {shift.remaining_slots} remaining</span></div>
         <DataState loading={false} error="" empty={applicants.length === 0} emptyMessage="No one has applied for this shift yet.">
           <div className="card-list">{applicants.map((item) => <article className="applicant-card" key={item.id}>
-            <div className="applicant-identity"><span className="avatar" aria-hidden="true"><span>{item.worker_name.trim().slice(0, 1).toUpperCase()}</span></span><div><h3>{item.worker_name}</h3><p>Applied {new Date(item.applied_at).toLocaleString()}</p>{item.status === 'ACCEPTED' && <p>Attendance: {item.attendance_status || 'NOT_MARKED'}</p>}{item.rejection_reason && <p>Reason: {item.rejection_reason}</p>}</div></div>
+            <button className="applicant-identity applicant-profile-trigger" type="button" onClick={() => openProfile(item.worker_id)} aria-label={`View ${item.worker_name}'s profile and ratings`}><span className="avatar" aria-hidden="true"><span>{item.worker_name.trim().slice(0, 1).toUpperCase()}</span></span><span><strong>{item.worker_name}</strong><small>Applied {new Date(item.applied_at).toLocaleString()}</small>{item.status === 'ACCEPTED' && <small>Attendance: {item.attendance_status || 'NOT_MARKED'}</small>}{item.rejection_reason && <small>Reason: {item.rejection_reason}</small>}<em>View profile & ratings</em></span></button>
             <span className={`chip chip-${item.status?.toLowerCase()}`}>{item.status}</span>
             <div className="shift-actions"><Button type="button" disabled={processingId !== null || item.status !== 'PENDING' || shift.status !== 'OPEN'} onClick={() => act(item.id, () => api.acceptApplication(item.id), 'Application accepted.')}>Accept</Button><Button type="button" variant="secondary" disabled={processingId !== null || item.status !== 'PENDING'} onClick={() => act(item.id, () => api.rejectApplication(item.id), 'Application rejected.')}>Reject</Button>{item.status === 'ACCEPTED' && shift.status !== 'COMPLETED' && <><Button type="button" variant="secondary" disabled={processingId !== null} onClick={() => act(item.id, () => api.markAttendance(item.id, 'PRESENT'), 'Attendance marked present.')}>Present</Button><Button type="button" variant="secondary" disabled={processingId !== null} onClick={() => act(item.id, () => api.markAttendance(item.id, 'ABSENT'), 'Attendance marked absent.')}>Absent</Button></>}</div>
             {item.status === 'ACCEPTED' && item.attendance_status === 'PRESENT' && (item.rated ? <span className="rated-badge"><FontAwesomeIcon icon={faStar} /> Rated</span> : <div className="rating-form"><label>Rating<select value={ratingDrafts[item.worker_id]?.score || 5} onChange={(event) => updateRating(item.worker_id, 'score', Number(event.target.value))}>{[5, 4, 3, 2, 1].map((score) => <option key={score} value={score}>{score} stars</option>)}</select></label><label>Review<input maxLength="1000" placeholder="Optional feedback" value={ratingDrafts[item.worker_id]?.review || ''} onChange={(event) => updateRating(item.worker_id, 'review', event.target.value)} /></label><Button type="button" disabled={processingId !== null} onClick={() => act(`rating-${item.id}`, () => api.rateWorker(shiftId, item.worker_id, { score: ratingDrafts[item.worker_id]?.score || 5, review: ratingDrafts[item.worker_id]?.review || null }), 'Worker rating saved.')}>Save rating</Button></div>)}
@@ -53,5 +65,6 @@ export function Applicants({ shiftId, onNavigate }) {
         </DataState>
       </section><section className="panel detail-action"><h2>Shift completion</h2><p>{completionReason}</p><Button type="button" disabled={processingId !== null || !canComplete} onClick={() => act('complete', () => api.completeShift(shiftId), 'Shift completed.')}>Complete shift</Button></section></>}
     </DataState>
+    {profileWorkerId && <ApplicantProfileModal profile={profile} loading={profileLoading} error={profileError} onRetry={() => openProfile(profileWorkerId)} onClose={closeProfile} />}
   </div>
 }
