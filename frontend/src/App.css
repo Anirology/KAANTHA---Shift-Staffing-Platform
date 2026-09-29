@@ -403,16 +403,16 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
 .dashboard-shell .business-profile-card { border: 1px solid #e5eeef; border-radius: 14px; background: white; box-shadow: 0 8px 25px rgba(28, 96, 112, .06); }
 .rated-badge { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 9px; color: #087d7b; background: #ddf5f1; font-weight: 700; }
-.shift-modal-backdrop { position: fixed; z-index: 100; inset: 0; display: grid; background: rgba(5, 30, 44, .55); backdrop-filter: blur(5px); }
-.shift-modal { position: relative; width: 100%; height: 100%; overflow: auto; border: 0; border-radius: 0; background: #f4fbfa; box-shadow: 0 24px 90px rgba(1, 24, 38, .3); outline: none; }
-.shift-modal .narrow-screen { max-width: 940px; padding: 34px clamp(20px, 5vw, 56px) 50px; }
+.shift-modal-backdrop { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: clamp(18px, 4vw, 48px); background: rgba(230, 242, 241, .78); backdrop-filter: blur(9px); }
+.shift-modal { position: relative; width: min(1040px, 100%); max-height: 92vh; overflow: auto; border: 1px solid rgba(143, 190, 188, .55); border-radius: 22px; background: #f7fbfa; box-shadow: 0 30px 90px rgba(1, 34, 48, .26); outline: none; }
+.shift-modal .narrow-screen { max-width: none; padding: 34px clamp(22px, 5vw, 54px) 44px; }
 .shift-modal .screen { align-content: start; gap: 20px; }
 .shift-modal .screen-heading h1 { padding-right: 42px; }
-.shift-modal-close { position: sticky; z-index: 2; top: 14px; float: right; display: grid; place-items: center; width: 40px; height: 40px; margin: 14px 14px -54px 0; border: 1px solid #dce8e8; border-radius: 50%; color: #18304f; background: white; font-size: 1.65rem; line-height: 1; }
+.shift-modal-close { position: absolute; z-index: 2; top: 18px; right: 18px; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #cfe0e0; border-radius: 50%; color: #18304f; background: white; box-shadow: 0 6px 16px rgba(15, 76, 92, .1); font-size: 1.65rem; line-height: 1; cursor: pointer; }
 .shift-modal-close:hover { background: #e9f7f5; }
 .shift-modal .shift-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .shift-modal .shift-form .shift-description-field, .shift-modal .shift-form .status, .shift-modal .shift-form .form-actions { grid-column: 1 / -1; }
-.shift-modal .shift-form .form-actions { position: sticky; bottom: -1px; padding: 14px 0 0; background: #f4fbfa; }
+.shift-modal .shift-form .form-actions { position: sticky; bottom: -1px; padding: 14px 0 0; background: #fff; }
 .dashboard-shell .application-card, .dashboard-shell .applicant-card { background: white; }
 .dashboard-shell .report-tab { border-color: #d9e8e8; border-radius: 9px; }
 .dashboard-shell .report-tab.active { border-color: #008b89; background: #008b89; }
@@ -479,9 +479,10 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
   .worker-hero-art { width: 54%; opacity: .55; }
 }
 @media (max-width: 600px) {
-  .shift-modal-backdrop { padding: 0; }
-  .shift-modal { width: 100%; height: 100%; max-height: none; border: 0; border-radius: 0; }
-  .shift-modal .narrow-screen { padding: 27px 17px 40px; }
+  .shift-modal-backdrop { padding: 12px; }
+  .shift-modal { width: 100%; max-height: calc(100vh - 24px); border-radius: 16px; }
+  .shift-modal .narrow-screen { padding: 28px 16px 34px; }
+  .shift-modal-close { top: 12px; right: 12px; }
   .shift-modal .shift-form { grid-template-columns: 1fr; }
   .shift-modal .shift-form .field, .shift-modal .shift-form .shift-description-field, .shift-modal .shift-form .status, .shift-modal .shift-form .form-actions { grid-column: 1; }
 }

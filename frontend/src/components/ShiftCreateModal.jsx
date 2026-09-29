@@ -17,7 +17,7 @@ export function ShiftCreateModal({ children, onClose }) {
     }
   }, [onClose])
 
-  return <div className="shift-modal-backdrop"><section className="shift-modal" role="dialog" aria-modal="true" aria-labelledby="shift-modal-title" tabIndex={-1} ref={dialog}>
+  return <div className="shift-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="shift-modal" role="dialog" aria-modal="true" aria-labelledby="shift-modal-title" tabIndex={-1} ref={dialog}>
     <button className="shift-modal-close" type="button" aria-label="Close create shift dialog" onClick={onClose}>×</button>
     {children}
   </section></div>
