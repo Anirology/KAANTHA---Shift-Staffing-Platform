@@ -41,7 +41,9 @@ export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
     event.preventDefault()
     setFormError('')
     setSaved(null)
-    const values = Object.fromEntries(new FormData(event.currentTarget).entries())
+    // Every input is controlled by React, so submit the same state the user sees.
+    // This prevents a field from being silently omitted if an HTML name is missed.
+    const values = fields
     if (!values.role?.trim()) { setFormError('Enter a job role.'); return }
     if (!values.date || !values.start_time || !values.end_time) { setFormError('Choose a date, start time and end time.'); return }
     if (values.start_time >= values.end_time) { setFormError('End time must be after start time on the same date.'); return }
@@ -68,7 +70,7 @@ export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
         {saved && <StatusMessage type="success">Shift {editing ? 'updated' : 'created'} successfully. <button type="button" className="text-button" onClick={() => onNavigate(`/business/shifts/${saved.id}`)}>View shift</button></StatusMessage>}
         {(!saved || editing) && <form className="form shift-form" onSubmit={submit}>
           <Field id="shift-role" name="role" label="Job role" placeholder="e.g. Cashier" value={fields.role} onChange={(event) => change('role', event.target.value)} required />
-          <label className="field shift-description-field" htmlFor="shift-description">Shift details <textarea id="shift-description" rows="5" maxLength="1000" placeholder="Describe the work, responsibilities, dress code or anything the worker should know." value={fields.description} onChange={(event) => change('description', event.target.value)} /><span className="field-hint">Optional · {fields.description.length}/1000 characters</span></label>
+          <label className="field shift-description-field" htmlFor="shift-description">Shift details <textarea id="shift-description" name="description" rows="5" maxLength="1000" placeholder="Describe the work, responsibilities, dress code or anything the worker should know." value={fields.description} onChange={(event) => change('description', event.target.value)} /><span className="field-hint">Optional · {fields.description.length}/1000 characters</span></label>
           <Field id="shift-date" name="date" label="Start date" type="date" value={fields.date} onChange={(event) => change('date', event.target.value)} required />
           <div className="field"><label htmlFor="shift-duration">Duration</label><select id="shift-duration" name="duration_days" value={fields.duration_days} onChange={(event) => change('duration_days', event.target.value)}>{Array.from({ length: 10 }, (_, index) => index + 1).map((days) => <option key={days} value={days}>{days} {days === 1 ? 'day' : 'consecutive days'}</option>)}</select><span className="field-hint">The accepted worker commits to the same hours on every selected day.</span></div>
           <Field id="shift-start" name="start_time" label="Start time" type="time" value={fields.start_time} onChange={(event) => change('start_time', event.target.value)} required />
