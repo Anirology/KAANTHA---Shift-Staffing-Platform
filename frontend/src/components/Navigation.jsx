@@ -1,12 +1,11 @@
 // Render public navigation or the authenticated Shiftly workspace sidebar.
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowRightFromBracket, faBriefcase, faBuilding, faChartColumn, faFileCirclePlus, faFileLines, faMagnifyingGlass, faStar, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faArrowRightFromBracket, faBriefcase, faBuilding, faChartColumn, faFileCirclePlus, faFileLines, faMagnifyingGlass, faUser } from '@fortawesome/free-solid-svg-icons'
 
 const workerLinks = [
   { path: '/worker', label: 'Browse shifts', icon: faMagnifyingGlass },
   { path: '/worker/applications', label: 'My applications', icon: faFileLines },
-  { path: '/worker/profile', label: 'My profile', icon: faUser },
-  { path: '/worker/ratings', label: 'Ratings', icon: faStar },
+  { path: '/worker/profile', label: 'Profile & ratings', icon: faUser },
 ]
 const businessLinks = [
   { path: '/business', label: 'Manage shifts', icon: faBriefcase },

@@ -152,6 +152,9 @@ html:has(.dashboard-shell), body:has(.dashboard-shell), #root:has(.dashboard-she
 .rating-card h2 { margin: 7px 0 4px; }
 .rating-card p { margin: 0; }
 .rating-stars { color: #d39416; letter-spacing: .1em; }
+.profile-ratings-section .section-heading-row { margin-bottom: 18px; }
+.profile-rating-card { padding: 17px; border: 1px solid #dceaea; border-radius: 12px; background: #fbfdfd; }
+.profile-rating-card h3 { margin: 8px 0 4px; color: #17313a; }
 .applicant-card, .application-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
 .applicant-card h3 { margin: 0; font-size: 1rem; }
 .application-card > div { flex: 1; }

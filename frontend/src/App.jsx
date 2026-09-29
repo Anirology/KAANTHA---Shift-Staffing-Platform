@@ -20,7 +20,6 @@ import { ImportShifts } from './pages/ImportShifts'
 import { Reports } from './pages/Reports'
 import { BusinessAccounts } from './pages/BusinessAccounts'
 import { Landing } from './pages/Landing'
-import { MyRatings } from './pages/MyRatings'
 import './App.css'
 
 function currentPath() {
@@ -30,7 +29,8 @@ function currentPath() {
 function routeFor(path) {
   // Resolve dynamic shift URLs before the fallback so detail actions receive their IDs.
   if (['/', '/login', '/register/worker', '/register/business'].includes(path)) return { path, role: null }
-  if (['/worker', '/worker/applications', '/worker/profile', '/worker/ratings'].includes(path)) return { path, role: 'WORKER' }
+  if (path === '/worker/ratings') return { path: '/worker/profile', role: 'WORKER' }
+  if (['/worker', '/worker/applications', '/worker/profile'].includes(path)) return { path, role: 'WORKER' }
   if (['/business', '/business/accounts', '/business/shifts/new', '/business/shifts/import', '/business/reports'].includes(path)) return { path, role: 'BUSINESS' }
   let match = path.match(/^\/(worker|business)\/shifts\/(\d+)$/)
   if (match) return { path: 'details', role: match[1].toUpperCase(), id: Number(match[2]) }
@@ -43,8 +43,7 @@ function guideFor(route) {
   const guides = {
     '/worker': ['Browse shifts', 'Use the filters to narrow the list, then open a shift to check its requirements before applying.'],
     '/worker/applications': ['My applications', 'PENDING means the business is reviewing it. ACCEPTED shifts are confirmed work.'],
-    '/worker/profile': ['Worker profile', 'Keep your skills and dated availability current so businesses can make informed decisions.'],
-    '/worker/ratings': ['My ratings', 'Businesses can rate your work after marking you present for a shift. Use feedback to build your work history.'],
+    '/worker/profile': ['Profile and ratings', 'Keep your skills and availability current, and review feedback from completed work.'],
     '/business': ['Manage shifts', 'Review staffing at a glance. Applicants is the fastest route to accepting workers and recording attendance.'],
     '/business/accounts': ['Businesses', 'Create and switch business profiles here. Every shift and report stays with the selected business.'],
     '/business/shifts/import': ['CSV import', 'Upload a shift CSV using the required columns, then review the result summary for any rejected rows.'],
@@ -155,8 +154,6 @@ export default function App() {
     content = <MyApplications onNavigate={navigate} />
   } else if (route.path === '/worker/profile') {
     content = <WorkerProfile />
-  } else if (route.path === '/worker/ratings') {
-    content = <MyRatings />
   } else if (route.path === '/business' || createShiftModal) {
     content = <ManageShifts key={activeBusinessId} businessName={account.businesses.find((business) => business.id === activeBusinessId)?.business_name} onNavigate={navigate} />
   } else if (route.path === '/business/accounts') {

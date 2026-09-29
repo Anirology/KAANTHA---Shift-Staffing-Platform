@@ -455,7 +455,7 @@ NEW: Completed shifts support one 1–5 rating per business, shift, and accepted
 
 BACKEND IMPACT: Adds the ratings router, completion/ownership/acceptance validation, duplicate protection, and the two endpoints above.
 
-FRONTEND IMPACT: Completed applicant cards include a rating form, and workers have a My Ratings page with an average score.
+FRONTEND IMPACT: Completed applicant cards include a rating form. Workers see their average and rating cards inside Profile & Ratings; ratings are not a separate page.
 
 DATABASE IMPACT: Adds `ratings(id, shift_id, worker_id, business_id, score, review, created_at)` and a unique constraint across shift, worker, and business. Existing data is unchanged.
 

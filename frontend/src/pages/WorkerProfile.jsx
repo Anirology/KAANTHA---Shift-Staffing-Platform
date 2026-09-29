@@ -12,6 +12,7 @@ const time = (value) => value?.slice(0, 5) || ''
 export function WorkerProfile() {
   const [profile, setProfile] = useState(null)
   const [catalogue, setCatalogue] = useState([])
+  const [ratings, setRatings] = useState([])
   const [name, setName] = useState('')
   const [skillId, setSkillId] = useState('')
   const [availability, setAvailability] = useState(blank)
@@ -24,8 +25,8 @@ export function WorkerProfile() {
 
   const load = useCallback(async () => {
     try {
-      const [worker, skills] = await Promise.all([api.workerProfile(), api.skills()])
-      setProfile(worker); setCatalogue(skills); setName(worker.name); setError(''); return true
+      const [worker, skills, feedback] = await Promise.all([api.workerProfile(), api.skills(), api.myRatings()])
+      setProfile(worker); setCatalogue(skills); setRatings(feedback); setName(worker.name); setError(''); return true
     } catch (caught) { setError(caught.message); return false }
     finally { setLoading(false) }
   }, [])
@@ -43,15 +44,17 @@ export function WorkerProfile() {
     action(() => editingId ? api.updateAvailability(editingId, fields) : api.addAvailability(fields), 'Availability saved.')
       .then((saved) => { if (saved) { setAvailability(blank); setEditingId(null) } })
   }
+  const averageRating = ratings.length ? (ratings.reduce((sum, rating) => sum + rating.score, 0) / ratings.length).toFixed(1) : null
 
   return <div className="screen">
-    <header className="screen-heading"><div><span className="intro-eyebrow">Worker</span><h1>My profile</h1><p>Keep your name, skills and dated availability up to date.</p></div></header>
+    <header className="screen-heading"><div><span className="intro-eyebrow">Worker</span><h1>Profile & ratings</h1><p>Manage your work profile and review feedback from completed shifts.</p></div>{averageRating && <div className="rating-average"><strong>{averageRating}</strong><span>Average · {ratings.length} {ratings.length === 1 ? 'rating' : 'ratings'}</span></div>}</header>
     <DataState loading={loading} error={error} onRetry={() => { setLoading(true); load() }} empty={!profile} emptyMessage="Profile unavailable.">
       {profile && <>
         {actionError && <StatusMessage type="error">{actionError}</StatusMessage>}{message && <StatusMessage type="success">{message}</StatusMessage>}
         <section className="panel"><h2>Profile</h2><p>Keep the name businesses see on applications up to date.</p><form className="inline-form" onSubmit={(event) => { event.preventDefault(); action(() => api.updateWorkerProfile({ name: name.trim() }), 'Profile saved.') }}><Field id="worker-name" label="Name" required value={name} onChange={(event) => setName(event.target.value)} /><Button type="submit" disabled={busy || !name.trim()}>Save name</Button></form></section>
         <section className="panel"><h2>Skills</h2><p>Choose skills from the shared catalogue.</p><div className="tag-list">{profile?.skills?.length ? profile.skills.map((skill) => <span className="skill-tag" key={skill.id}>{skill.name} <button type="button" disabled={busy} aria-label={`Remove ${skill.name}`} onClick={() => action(() => api.removeWorkerSkill(skill.id), 'Skill removed.')}>×</button></span>) : <p>No skills added yet.</p>}</div><div className="inline-form"><label className="field" htmlFor="profile-skill">Add a skill<select id="profile-skill" value={skillId} onChange={(event) => setSkillId(event.target.value)}><option value="">Select a skill</option>{catalogue.filter((skill) => !profile.skills.some((owned) => owned.id === skill.id)).map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></label><Button type="button" disabled={busy || !skillId} onClick={() => action(() => api.addWorkerSkill(Number(skillId)), 'Skill added.').then((saved) => { if (saved) setSkillId('') })}>Add skill</Button></div></section>
         <section className="panel"><h2>Dated availability</h2><p>Availability helps you plan; acceptance also checks confirmed overlaps.</p><div className="card-list availability-list">{profile?.availability?.length ? profile.availability.map((entry) => <div className="availability-row" key={entry.id}><span>{entry.date} · {time(entry.start_time)}–{time(entry.end_time)}</span><div className="shift-actions"><Button type="button" variant="secondary" disabled={busy} onClick={() => { setEditingId(entry.id); setAvailability({ date: entry.date, start_time: time(entry.start_time), end_time: time(entry.end_time) }); setActionError('') }}>Edit</Button><Button type="button" variant="secondary" disabled={busy} onClick={() => action(() => api.removeAvailability(entry.id), 'Availability removed.')}>Remove</Button></div></div>) : <p>No availability added yet.</p>}</div><form className="availability-form" onSubmit={saveAvailability}><Field id="available-date" label="Date" type="date" required value={availability.date} onChange={(event) => setAvailability({ ...availability, date: event.target.value })} /><Field id="available-start" label="Start time" type="time" required value={availability.start_time} onChange={(event) => setAvailability({ ...availability, start_time: event.target.value })} /><Field id="available-end" label="End time" type="time" required value={availability.end_time} onChange={(event) => setAvailability({ ...availability, end_time: event.target.value })} /><Button type="submit" disabled={busy}>{editingId ? 'Save changes' : 'Add availability'}</Button>{editingId && <Button type="button" variant="secondary" onClick={() => { setEditingId(null); setAvailability(blank) }}>Cancel edit</Button>}</form></section>
+        <section className="panel profile-ratings-section" aria-labelledby="profile-ratings-title"><div className="section-heading-row"><div><span className="intro-eyebrow">Work feedback</span><h2 id="profile-ratings-title">Ratings</h2></div>{averageRating && <span className="timeline-count">{averageRating} / 5</span>}</div>{ratings.length === 0 ? <p>You have no ratings yet. They appear after completed shifts.</p> : <div className="card-list">{ratings.map((rating) => <article className="rating-card profile-rating-card" key={rating.id}><div><span className="rating-stars" aria-label={`${rating.score} out of 5 stars`}>{'★'.repeat(rating.score)}{'☆'.repeat(5 - rating.score)}</span><h3>{rating.shift_role}</h3><p>{rating.business_name} · Shift #{rating.shift_id}</p></div><p>{rating.review || 'No written review.'}</p></article>)}</div>}</section>
       </>}
     </DataState>
   </div>
