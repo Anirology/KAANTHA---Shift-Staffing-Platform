@@ -21,6 +21,7 @@ from app.database import get_db
 from app.dependencies import get_business
 from app.models import Application, ApplicationStatus, AttendanceStatus, Business, Shift, ShiftStatus
 from app.schemas.schemas import AttendanceReport, StaffingReport, WorkerReport
+from app.services.schedule import shift_end_date
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -48,9 +49,9 @@ def filtered_shifts(business_id: int, from_date: date | None, to_date: date | No
     if from_date and to_date and from_date > to_date:
         raise HTTPException(422, "from_date must be on or before to_date.")
     query = select(Shift).where(Shift.business_id == business_id)
-    if from_date: query = query.where(Shift.date >= from_date)
     if to_date: query = query.where(Shift.date <= to_date)
-    return db.scalars(query.order_by(Shift.date, Shift.id)).all()
+    shifts = db.scalars(query.order_by(Shift.date, Shift.id)).all()
+    return [shift for shift in shifts if not from_date or shift_end_date(shift.date, shift.duration_days) >= from_date]
 
 
 def rows_for_staffing(shifts, db):
@@ -71,11 +72,11 @@ def workers(from_date: date | None = None, to_date: date | None = None, business
     result = {}
     for shift in filtered_shifts(business.id, from_date, to_date, db):
         if shift.status != ShiftStatus.COMPLETED.value: continue
-        hours = Decimal((datetime.combine(date.min, shift.end_time) - datetime.combine(date.min, shift.start_time)).seconds) / Decimal(3600)
+        hours = Decimal((datetime.combine(date.min, shift.end_time) - datetime.combine(date.min, shift.start_time)).seconds) / Decimal(3600) * shift.duration_days
         for item in shift.applications:
             if item.status == ApplicationStatus.ACCEPTED.value and item.attendance and item.attendance.status == AttendanceStatus.PRESENT.value:
                 current = result.setdefault(item.worker_id, {"worker_id": item.worker_id, "worker_name": item.worker.name, "completed_shifts": 0, "total_hours": Decimal(0), "total_earnings": Decimal(0)})
-                current["completed_shifts"] += 1; current["total_hours"] += hours; current["total_earnings"] += shift.payment
+                current["completed_shifts"] += 1; current["total_hours"] += hours; current["total_earnings"] += shift.payment * shift.duration_days
     return list(result.values())
 
 

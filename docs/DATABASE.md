@@ -238,15 +238,15 @@ erDiagram
 
 \- `required\_workers` must be greater than zero; `payment` cannot be negative.
 
-\- `start\_time` must be earlier than `end\_time`. The first version supports same-day shifts only.
+\- `start\_time` must be earlier than `end\_time`; the same daily hours repeat for `duration\_days` from 1 through 10 consecutive dates.
 
 \- Availability uses a specific `date`; a worker may have multiple availability periods.
 
-\- Payment is in LKR \*\*per shift\*\*, not per hour.
+\- `payment` is in LKR per day. Total worker payment is calculated as `payment × duration\_days`.
 
 \- Only accepted applications count as confirmed staffing. Their count determines whether a shift becomes `FILLED`.
 
-\- Acceptance must check required skill, overlap with other accepted shifts on the same date, and remaining capacity in one transaction.
+\- Acceptance must check required skill, overlap across every covered date, and remaining capacity in one transaction.
 
 \- Failed acceptance leaves the application `PENDING`.
 

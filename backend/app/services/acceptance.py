@@ -1,10 +1,13 @@
 """Validate and commit worker acceptance while protecting skill, schedule, and shift capacity rules."""
 
+from datetime import timedelta
+
 from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, aliased
 
 from app.models import Application, ApplicationStatus, Attendance, AttendanceStatus, Shift, ShiftStatus, Worker, WorkerSkill
+from app.services.schedule import shift_end_date, shifts_overlap
 
 
 def accept_application(db: Session, application_id: int, business_id: int) -> Application:
@@ -23,14 +26,13 @@ def accept_application(db: Session, application_id: int, business_id: int) -> Ap
     if not skill:
         raise HTTPException(409, "Worker does not have the required skill.")
     existing_shift = aliased(Shift)
-    overlap = db.scalar(select(Application.id).join(existing_shift, Application.shift_id == existing_shift.id).where(
+    existing_shifts = db.scalars(select(existing_shift).join(Application, Application.shift_id == existing_shift.id).where(
         Application.worker_id == application.worker_id,
         Application.status == ApplicationStatus.ACCEPTED.value,
-        existing_shift.date == shift.date,
-        existing_shift.start_time < shift.end_time,
-        existing_shift.end_time > shift.start_time,
-    ).with_for_update())
-    if overlap:
+        existing_shift.date <= shift_end_date(shift.date, shift.duration_days),
+        existing_shift.date >= shift.date - timedelta(days=9),
+    ).with_for_update()).all()
+    if any(shifts_overlap(shift, item) for item in existing_shifts):
         raise HTTPException(409, "Worker has an overlapping accepted shift.")
     # Recount under the lock before changing status, then update both records together.
     accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0

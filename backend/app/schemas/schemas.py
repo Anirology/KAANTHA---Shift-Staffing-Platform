@@ -131,6 +131,7 @@ class ShiftBase(BaseModel):
     role: str = Field(min_length=1, max_length=100)
     description: str | None = Field(default=None, max_length=1000)
     date: date
+    duration_days: int = Field(default=1, ge=1, le=10, description="Consecutive calendar days, from 1 to 10")
     start_time: time
     end_time: time
     required_workers: int = Field(gt=0)
@@ -145,16 +146,23 @@ class ShiftBase(BaseModel):
             raise ValueError("start_time must be before end_time")
         return value
 
-
 class ShiftPatch(BaseModel):
     role: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = Field(default=None, max_length=1000)
     date: DateType | None = None
+    duration_days: int | None = Field(default=None, ge=1, le=10)
     start_time: TimeType | None = None
     end_time: TimeType | None = None
     required_workers: int | None = Field(default=None, gt=0)
     payment: Annotated[Decimal | None, Field(default=None, ge=0, max_digits=10, decimal_places=2)]
     required_skill_id: int | None = Field(default=None, gt=0)
+
+    @field_validator("duration_days")
+    @classmethod
+    def valid_duration(cls, value: int | None) -> int | None:
+        if value is None:
+            raise ValueError("duration_days cannot be null")
+        return value
 
 
 class ShiftResponse(BaseModel):
@@ -165,10 +173,12 @@ class ShiftResponse(BaseModel):
     role: str
     description: str | None
     date: date
+    duration_days: int = 1
     start_time: time
     end_time: time
     required_workers: int
     payment: Decimal
+    total_payment: Decimal
     required_skill_id: int
     required_skill_name: str
     status: ShiftStatus

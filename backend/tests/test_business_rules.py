@@ -35,10 +35,10 @@ def skill_id(session_factory) -> int:
         return skill.id
 
 
-def create_shift(client, headers, skill, start="09:00:00", end="12:00:00", workers=1):
+def create_shift(client, headers, skill, start="09:00:00", end="12:00:00", workers=1, shift_date="2030-01-01", duration_days=1):
     response = client.post("/api/v1/shifts", headers=headers, json={
-        "role": "Cashier", "date": "2030-01-01", "start_time": start,
-        "end_time": end, "required_workers": workers, "payment": "1500.00",
+        "role": "Cashier", "date": shift_date, "start_time": start,
+        "end_time": end, "duration_days": duration_days, "required_workers": workers, "payment": "1500.00",
         "required_skill_id": skill,
     })
     assert response.status_code == 201
@@ -180,6 +180,44 @@ def test_adjacent_shifts_are_allowed_and_overlaps_stay_pending(api):
         db.commit()
         other_skill_id = other_skill.id
     assert client.patch(f"/api/v1/shifts/{first_shift}", headers=business, json={"required_skill_id": other_skill_id}).status_code == 409
+
+
+def test_multi_day_shift_keeps_one_worker_and_blocks_any_day_overlap(api):
+    client, sessions = api
+    business, worker = register_business(client), register_worker(client)
+    skill = skill_id(sessions)
+    assert client.post("/api/v1/workers/me/skills", headers=worker, json={"skill_id": skill}).status_code == 201
+    multi_day = client.post("/api/v1/shifts", headers=business, json={
+        "role": "Festival cashier", "date": "2030-01-01", "duration_days": 10,
+        "start_time": "09:00:00", "end_time": "12:00:00", "required_workers": 1,
+        "payment": "1500.00", "required_skill_id": skill,
+    })
+    assert multi_day.status_code == 201
+    shift_id = multi_day.json()["id"]
+    assert multi_day.json()["duration_days"] == 10
+    assert Decimal(multi_day.json()["total_payment"]) == Decimal("15000.00")
+    assert [item["id"] for item in client.get("/api/v1/shifts?date=2030-01-10", headers=worker).json()] == [shift_id]
+    assert client.get("/api/v1/shifts?date=2030-01-11", headers=worker).json() == []
+
+    application_id = apply(client, worker, shift_id)
+    assert client.patch(f"/api/v1/applications/{application_id}/accept", headers=business).status_code == 200
+    assert client.patch(f"/api/v1/applications/{application_id}/attendance", headers=business, json={"status": "PRESENT"}).status_code == 200
+    assert client.patch(f"/api/v1/shifts/{shift_id}/complete", headers=business).status_code == 200
+    worker_report = client.get("/api/v1/reports/workers?from_date=2030-01-02&to_date=2030-01-02", headers=business).json()
+    assert worker_report[0]["completed_shifts"] == 1
+    assert Decimal(worker_report[0]["total_hours"]) == Decimal("30")
+    assert Decimal(worker_report[0]["total_earnings"]) == Decimal("15000.00")
+    conflicting = create_shift(client, business, skill, "10:00:00", "11:00:00", shift_date="2030-01-10")
+    conflicting_application = apply(client, worker, conflicting)
+    assert client.patch(f"/api/v1/applications/{conflicting_application}/accept", headers=business).status_code == 409
+
+    adjacent = create_shift(client, business, skill, "09:00:00", "10:00:00", shift_date="2030-01-11")
+    adjacent_application = apply(client, worker, adjacent)
+    assert client.patch(f"/api/v1/applications/{adjacent_application}/accept", headers=business).status_code == 200
+    edit_overlap = client.patch(f"/api/v1/shifts/{adjacent}", headers=business, json={"date": "2030-01-02", "duration_days": 10})
+    assert edit_overlap.status_code == 409
+    assert client.patch(f"/api/v1/shifts/{shift_id}", headers=business, json={"duration_days": 11}).status_code == 422
+    assert client.patch(f"/api/v1/shifts/{shift_id}", headers=business, json={"duration_days": None}).status_code == 422
 
 
 def test_csv_import_reports_valid_and_invalid_rows(api):

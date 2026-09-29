@@ -111,6 +111,7 @@ class Shift(Base):
     role: Mapped[str] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     date: Mapped[date] = mapped_column(Date)
+    duration_days: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     start_time: Mapped[time] = mapped_column(Time)
     end_time: Mapped[time] = mapped_column(Time)
     required_workers: Mapped[int] = mapped_column(Integer)

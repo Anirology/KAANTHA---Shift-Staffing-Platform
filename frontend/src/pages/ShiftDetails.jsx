@@ -5,6 +5,7 @@ import { Button } from '../components/Button'
 import { DataState } from '../components/DataState'
 import { ShiftCard } from '../components/ShiftCard'
 import { StatusMessage } from '../components/StatusMessage'
+import { formatMoney } from '../utils/format'
 
 export function ShiftDetails({ shiftId, accountRole, onNavigate }) {
   const [shift, setShift] = useState(null)
@@ -37,7 +38,7 @@ export function ShiftDetails({ shiftId, accountRole, onNavigate }) {
     <header className="screen-heading"><div><span className="intro-eyebrow">{accountRole === 'WORKER' ? 'Worker' : 'Business'}</span><h1>Shift details</h1><p>Review the current details from Shiftly.</p></div></header>
     <DataState loading={loading} error={error} onRetry={retry} empty={!shift} emptyMessage="This shift is unavailable.">
       {shift && <><ShiftCard shift={shift} actions={accountRole === 'BUSINESS' ? <><Button type="button" onClick={() => onNavigate(`/business/shifts/${shiftId}/applicants`)}>View applicants</Button><Button type="button" variant="secondary" onClick={() => onNavigate(`/business/shifts/${shiftId}/edit`)} disabled={['CANCELLED', 'COMPLETED'].includes(shift.status)}>Edit shift</Button></> : null} />
-      <section className="panel shift-description-panel"><span className="intro-eyebrow">About this shift</span><h2>Shift details</h2><p>{shift.description || 'No extra details were provided for this shift.'}</p></section>
+      <section className="panel shift-description-panel"><span className="intro-eyebrow">About this shift</span><h2>What you will do</h2><p className="shift-description-copy">{shift.description || 'The business has not added extra work instructions yet.'}</p>{(shift.duration_days || 1) > 1 && <div className="commitment-notice"><strong>{shift.duration_days}-day commitment</strong><span>You are applying for every day in this date range, at the listed daily hours.</span><span>{formatMoney(shift.payment)} per day · {formatMoney(shift.total_payment || Number(shift.payment) * shift.duration_days)} total per worker</span></div>}</section>
       {accountRole === 'WORKER' && <section className="panel detail-action">
         <h2>Your application</h2>
         {application ? <><p>Current status: <span className={`chip chip-${application.status?.toLowerCase()}`}>{application.status}</span></p><Button type="button" variant="secondary" onClick={() => onNavigate('/worker/applications')}>My applications</Button></> : <><p>Apply to express interest. A business must accept your application before it is confirmed.</p><Button type="button" disabled={busy || shift.status !== 'OPEN'} onClick={apply}>{busy ? 'Applying…' : shift.status === 'OPEN' ? 'Apply for shift' : 'Applications closed'}</Button></>}

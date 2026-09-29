@@ -489,3 +489,17 @@ DATABASE IMPACT: None. PDF generation reads the same report queries and does not
 
 DOCUMENTATION IMPACT: API, deployment dependencies, and report demonstrations must include the three PDF endpoints.
 
+## SHARED CONTRACT CHANGE - consecutive multi-day shifts (2026-09-29)
+
+OLD: A shift represented one calendar date. The unfinished duration draft accepted only 1 or 3 days and did not expose a reliable total payment.
+
+NEW: Shift create/update accepts `duration_days` from 1 through 10. `date` is the first day, `payment` is the daily payment, and shift responses include `total_payment = payment × duration_days`. One accepted application commits the worker to the same daily hours for every consecutive day.
+
+BACKEND IMPACT: Shift validation, date filtering, overlap checks, reports, and CSV import understand the full 1–10 day range. Legacy shift CSV files without `duration_days` still create one-day shifts.
+
+FRONTEND IMPACT: Create Shift offers 1–10 days, cards/details show the complete date range, daily and total payment, and an explicit commitment message. My Applications separates complete history from upcoming confirmed work.
+
+DATABASE IMPACT: `shifts.duration_days` is a non-null integer defaulting to 1. Existing rows remain one-day shifts.
+
+DOCUMENTATION IMPACT: Explain that `payment` is per day, `total_payment` is calculated, and acceptance covers the full consecutive date range.
+

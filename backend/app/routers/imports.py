@@ -14,7 +14,8 @@ from app.models import Business, Shift, Skill
 from app.schemas.schemas import ImportResponse
 
 router = APIRouter(prefix="/shifts", tags=["imports"])
-HEADERS = ["role", "date", "start_time", "end_time", "required_workers", "payment", "required_skill_id"]
+LEGACY_HEADERS = ["role", "date", "start_time", "end_time", "required_workers", "payment", "required_skill_id"]
+HEADERS = ["role", "date", "duration_days", "start_time", "end_time", "required_workers", "payment", "required_skill_id"]
 
 
 @router.post("/import", response_model=ImportResponse)
@@ -28,19 +29,21 @@ def import_shifts(file: UploadFile = File(...), business: Business = Depends(get
         reader = csv.DictReader(io.StringIO(raw.decode("utf-8-sig")))
     except UnicodeDecodeError:
         raise HTTPException(400, "CSV file must be UTF-8 encoded.")
-    if reader.fieldnames != HEADERS:
+    if tuple(reader.fieldnames or ()) not in {tuple(HEADERS), tuple(LEGACY_HEADERS)}:
         raise HTTPException(400, "CSV headers do not match the required contract.")
+    import_headers = reader.fieldnames
     rows = list(reader)
     errors = []
     valid = []
     for row_number, row in enumerate(rows, start=2):
         values = {}
-        for field in HEADERS:
+        for field in import_headers:
             if not row.get(field): errors.append({"row": row_number, "field": field, "message": "Field is required."})
         if any(error["row"] == row_number for error in errors): continue
         try:
             values["role"] = row["role"]
             values["date"] = date.fromisoformat(row["date"])
+            values["duration_days"] = int(row.get("duration_days") or 1)
             values["start_time"] = time.fromisoformat(row["start_time"])
             values["end_time"] = time.fromisoformat(row["end_time"])
             values["required_workers"] = int(row["required_workers"])
@@ -48,6 +51,7 @@ def import_shifts(file: UploadFile = File(...), business: Business = Depends(get
             values["required_skill_id"] = int(row["required_skill_id"])
             if values["start_time"] >= values["end_time"]: raise ValueError("start_time must be before end_time")
             if values["required_workers"] <= 0: raise ValueError("required_workers must be greater than zero")
+            if not 1 <= values["duration_days"] <= 10: raise ValueError("duration_days must be between 1 and 10")
             if values["payment"] < 0: raise ValueError("payment cannot be negative")
             if not db.get(Skill, values["required_skill_id"]):
                 errors.append({"row": row_number, "field": "required_skill_id", "message": "Skill does not exist."}); continue

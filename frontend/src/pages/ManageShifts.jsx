@@ -51,7 +51,7 @@ export function ManageShifts({ businessName, onNavigate }) {
     ['Required positions', requiredPositions],
     ['Confirmed positions', acceptedPositions],
     ['Fill rate', requiredPositions ? `${Math.round((acceptedPositions / requiredPositions) * 100)}%` : '0%'],
-    ['Completed staffing cost', formatMoney(shifts.filter((shift) => shift.status === 'COMPLETED').reduce((sum, shift) => sum + Number(shift.payment) * shift.accepted_count, 0))],
+    ['Completed staffing cost', formatMoney(shifts.filter((shift) => shift.status === 'COMPLETED').reduce((sum, shift) => sum + Number(shift.total_payment || Number(shift.payment) * (shift.duration_days || 1)) * shift.accepted_count, 0))],
   ]
 
   return <div className="screen">

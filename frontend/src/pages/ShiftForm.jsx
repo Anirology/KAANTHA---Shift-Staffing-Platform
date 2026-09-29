@@ -7,7 +7,7 @@ import { DataState } from '../components/DataState'
 import { Field } from '../components/Field'
 import { StatusMessage } from '../components/StatusMessage'
 
-const initial = { role: '', description: '', date: '', start_time: '', end_time: '', required_workers: '1', payment: '', required_skill_id: '' }
+const initial = { role: '', description: '', date: '', duration_days: '1', start_time: '', end_time: '', required_workers: '1', payment: '', required_skill_id: '' }
 
 export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
   const editing = Boolean(shiftId)
@@ -26,7 +26,7 @@ export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
       setSkills(skillList)
       setShift(current)
       setFields(current ? {
-        role: current.role, description: current.description || '', date: current.date, start_time: current.start_time.slice(0, 5), end_time: current.end_time.slice(0, 5),
+        role: current.role, description: current.description || '', date: current.date, duration_days: String(current.duration_days || 1), start_time: current.start_time.slice(0, 5), end_time: current.end_time.slice(0, 5),
         required_workers: String(current.required_workers), payment: current.payment, required_skill_id: String(current.required_skill_id),
       } : initial)
     } catch (caught) { setError(caught.message) }
@@ -49,7 +49,7 @@ export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
     if (!values.required_skill_id) { setFormError('Choose a required skill.'); return }
     const payload = {
       role: values.role.trim(), description: values.description?.trim() || null, date: values.date, start_time: toApiTime(values.start_time), end_time: toApiTime(values.end_time),
-      required_workers: Number(values.required_workers), payment: decimalString(values.payment), required_skill_id: Number(values.required_skill_id),
+      duration_days: Number(values.duration_days), required_workers: Number(values.required_workers), payment: decimalString(values.payment), required_skill_id: Number(values.required_skill_id),
     }
     setBusy(true)
     try {
@@ -69,11 +69,12 @@ export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
         {(!saved || editing) && <form className="form shift-form" onSubmit={submit}>
           <Field id="shift-role" name="role" label="Job role" placeholder="e.g. Cashier" value={fields.role} onChange={(event) => change('role', event.target.value)} required />
           <label className="field shift-description-field" htmlFor="shift-description">Shift details <textarea id="shift-description" rows="5" maxLength="1000" placeholder="Describe the work, responsibilities, dress code or anything the worker should know." value={fields.description} onChange={(event) => change('description', event.target.value)} /><span className="field-hint">Optional · {fields.description.length}/1000 characters</span></label>
-          <Field id="shift-date" name="date" label="Date" type="date" value={fields.date} onChange={(event) => change('date', event.target.value)} required />
+          <Field id="shift-date" name="date" label="Start date" type="date" value={fields.date} onChange={(event) => change('date', event.target.value)} required />
+          <div className="field"><label htmlFor="shift-duration">Duration</label><select id="shift-duration" name="duration_days" value={fields.duration_days} onChange={(event) => change('duration_days', event.target.value)}>{Array.from({ length: 10 }, (_, index) => index + 1).map((days) => <option key={days} value={days}>{days} {days === 1 ? 'day' : 'consecutive days'}</option>)}</select><span className="field-hint">The accepted worker commits to the same hours on every selected day.</span></div>
           <Field id="shift-start" name="start_time" label="Start time" type="time" value={fields.start_time} onChange={(event) => change('start_time', event.target.value)} required />
           <Field id="shift-end" name="end_time" label="End time" type="time" value={fields.end_time} onChange={(event) => change('end_time', event.target.value)} required />
           <Field id="shift-workers" name="required_workers" label="Required workers" type="number" min="1" step="1" value={fields.required_workers} onChange={(event) => change('required_workers', event.target.value)} required />
-          <Field id="shift-payment" name="payment" label="Payment per shift (LKR)" type="number" min="0" step="0.01" value={fields.payment} onChange={(event) => change('payment', event.target.value)} required />
+          <Field id="shift-payment" name="payment" label="Payment per day (LKR)" type="number" min="0" step="0.01" value={fields.payment} onChange={(event) => change('payment', event.target.value)} hint={fields.payment ? `Total per worker: LKR ${(Number(fields.payment) * Number(fields.duration_days || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''} required />
           <div className="field"><label htmlFor="shift-skill">Required skill</label><select id="shift-skill" name="required_skill_id" value={fields.required_skill_id} onChange={(event) => change('required_skill_id', event.target.value)} required><option value="">Select a skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></div>
           {formError && <StatusMessage type="error">{formError}</StatusMessage>}
           <div className="form-actions"><Button type="submit" disabled={busy}>{busy ? 'Saving…' : editing ? 'Save changes' : 'Create shift'}</Button><Button type="button" variant="secondary" disabled={busy} onClick={() => onNavigate('/business')}>Back to shifts</Button></div>

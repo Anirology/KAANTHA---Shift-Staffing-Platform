@@ -7,6 +7,7 @@ from app.models import Skill
 from migrations.allow_multiple_businesses import apply_migration as allow_multiple_businesses
 from migrations.add_shift_description import apply_migration as add_shift_description
 from migrations.add_profile_photos import apply_migration as add_profile_photos
+from migrations.add_shift_duration import apply_migration as add_shift_duration
 
 STARTER_SKILLS = (
     ("Cashier", "Handles checkout and customer payments."),
@@ -24,6 +25,7 @@ def seed() -> int:
         allow_multiple_businesses(connection)
         add_shift_description(connection)
         add_profile_photos(connection)
+        add_shift_duration(connection)
     Base.metadata.create_all(bind=engine)
     created = 0
     with SessionLocal() as db:

@@ -1,7 +1,8 @@
 """Manage shift listings, business shift actions, applications, attendance, and completion."""
 
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
+from types import SimpleNamespace
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Response
 from sqlalchemy import func, select
@@ -13,13 +14,14 @@ from app.models import Application, ApplicationStatus, Attendance, AttendanceSta
 from app.schemas.schemas import ApplicationResponse, AttendanceRequest, RejectionRequest, ShiftBase, ShiftPatch, ShiftResponse
 from app.routers.workers import application_response
 from app.services.acceptance import accept_application
+from app.services.schedule import shift_end_date, shifts_overlap
 
 router = APIRouter(tags=["shifts", "applications"])
 
 
 def shift_response(shift: Shift, db: Session) -> ShiftResponse:
     accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0
-    return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, business_photo_url=shift.business.photo_url, role=shift.role, description=shift.description, date=shift.date, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
+    return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, business_photo_url=shift.business.photo_url, role=shift.role, description=shift.description, date=shift.date, duration_days=shift.duration_days, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, total_payment=shift.payment * shift.duration_days, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
 
 
 def owned_application(application_id: int, business: Business, db: Session) -> Application:
@@ -36,10 +38,15 @@ def list_shifts(role: str | None = None, skill_id: int | None = None, date: date
     query = select(Shift).options(joinedload(Shift.business), joinedload(Shift.required_skill))
     if role: query = query.where(Shift.role == role)
     if skill_id: query = query.where(Shift.required_skill_id == skill_id)
-    if date: query = query.where(Shift.date == date)
+    # Fetch at most ten possible start dates, then use the shared range rule so
+    # this remains portable across SQLite, MySQL, and PostgreSQL.
+    if date: query = query.where(Shift.date <= date, Shift.date >= date - timedelta(days=9))
     if min_payment is not None: query = query.where(Shift.payment >= min_payment)
     if status: query = query.where(Shift.status == status.value)
-    return [shift_response(item, db) for item in db.scalars(query.order_by(Shift.date, Shift.start_time)).all()]
+    shifts = db.scalars(query.order_by(Shift.date, Shift.start_time)).all()
+    if date:
+        shifts = [item for item in shifts if shift_end_date(item.date, item.duration_days) >= date]
+    return [shift_response(item, db) for item in shifts]
 
 
 @router.get("/shifts/{shift_id}", response_model=ShiftResponse)
@@ -86,19 +93,21 @@ def update_shift(shift_id: int, data: ShiftPatch, business: Business = Depends(g
     proposed_skill = values.get("required_skill_id", shift.required_skill_id)
     # Editing an active shift must not invalidate confirmed workers or double-book them.
     other_shift = aliased(Shift)
+    proposed_duration = values.get("duration_days", shift.duration_days)
+    proposed_end_date = shift_end_date(proposed_date, proposed_duration)
     for application in accepted_applications:
         has_skill = db.scalar(select(WorkerSkill.worker_id).where(WorkerSkill.worker_id == application.worker_id, WorkerSkill.skill_id == proposed_skill))
         if not has_skill:
             raise HTTPException(409, "The edit would invalidate an accepted worker's required skill.")
-        overlap = db.scalar(select(Application.id).join(other_shift, Application.shift_id == other_shift.id).where(
+        existing_shifts = db.scalars(select(other_shift).join(Application, Application.shift_id == other_shift.id).where(
             Application.worker_id == application.worker_id,
             Application.status == ApplicationStatus.ACCEPTED.value,
             Application.shift_id != shift.id,
-            other_shift.date == proposed_date,
-            other_shift.start_time < end,
-            other_shift.end_time > start,
-        ))
-        if overlap:
+            other_shift.date <= proposed_end_date,
+            other_shift.date >= proposed_date - timedelta(days=9),
+        )).all()
+        proposed = SimpleNamespace(date=proposed_date, duration_days=proposed_duration, start_time=start, end_time=end)
+        if any(shifts_overlap(proposed, item) for item in existing_shifts):
             raise HTTPException(409, "The edit would overlap an accepted worker's confirmed shift.")
     for key, value in values.items(): setattr(shift, key, value)
     if shift.status == ShiftStatus.FILLED.value and accepted < shift.required_workers:
