@@ -92,7 +92,12 @@ export default function App() {
           if (chosen) { saveBusinessId(chosen); setActiveBusinessId(chosen) }
         }
       })
-      .catch((error) => { if (active) setSessionError(error.message) })
+      .catch((error) => {
+        if (!active) return
+        // A 401 clears the stored token and dispatches the expiry event in the API layer.
+        // Do not replace that clean logout state with a second stale-token error.
+        setSessionError(getToken() ? error.message : '')
+      })
       .finally(() => { if (active) setChecking(false) })
     return () => { active = false }
   }, [])
