@@ -60,7 +60,7 @@ export function BrowseShifts({ onNavigate }) {
 
   return (
     <div className="screen">
-      <header className="dashboard-hero"><div className="dashboard-hero-copy"><span className="intro-eyebrow">Worker</span><h1>Browse shifts</h1><p>Explore open shifts and check their required skills and times.</p></div><div className="worker-hero-art" aria-hidden="true"><span className="hero-soft-shape"/><span className="hero-calendar"><FontAwesomeIcon icon={faCalendarDays} /></span><img src="/shiftly-worker-cutout.png" alt="" /></div></header>
+      <header className="dashboard-hero worker-browse-hero"><div className="dashboard-hero-copy"><span className="intro-eyebrow">Worker</span><h1>Browse shifts</h1><p>Explore open shifts and check their required skills and times.</p></div><div className="worker-hero-art" aria-hidden="true"><span className="hero-soft-shape"/><span className="hero-calendar"><FontAwesomeIcon icon={faCalendarDays} /></span><img src="/shiftly-worker-cutout.png" alt="" /></div></header>
       <form className="filter-panel" onSubmit={(event) => { event.preventDefault(); setLoading(true); setError(''); setQuery({ status: 'OPEN', ...filters }) }}>
         <Field id="filter-role" label="Job role" placeholder="e.g. Cashier" value={filters.role} onChange={(event) => setFilters({ ...filters, role: event.target.value })} />
         <div className="field"><label htmlFor="filter-skill">Required skill</label><select id="filter-skill" value={filters.skill_id} onChange={(event) => setFilters({ ...filters, skill_id: event.target.value })}><option value="">Any skill</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}</select></div>

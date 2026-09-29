@@ -1,15 +1,38 @@
 /* Set global typography, colors, resets, and shared layout styles. */
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #17313a;
-  background: #e7f0ef;
+  color: #132b3a;
+  background: #eef7f6;
+  --navy-950: #071f2e;
+  --navy-900: #0b3444;
+  --navy-800: #0f4c5c;
+  --navy-700: #1b6070;
+  --teal-700: #08756f;
+  --teal-600: #0b8b83;
+  --teal-500: #16a198;
+  --mint-100: #def4f1;
+  --mint-50: #eff9f7;
+  --page: #eef7f6;
+  --surface: #ffffff;
+  --surface-muted: #f7fbfa;
+  --text: #132b3a;
+  --text-strong: #102342;
+  --text-muted: #587184;
+  --border: #d4e3e3;
+  --border-strong: #afcdca;
+  --danger: #9a3340;
+  --danger-soft: #fff0f1;
+  --warning: #805200;
+  --warning-soft: #fff3d8;
+  --shadow-sm: 0 8px 24px rgba(15, 76, 92, .07);
+  --shadow-md: 0 18px 46px rgba(15, 76, 92, .11);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; }
+body { margin: 0; min-width: 320px; color: var(--text); background: var(--page); }
 button, input { font: inherit; }
 button { cursor: pointer; }
-a { color: #087f79; }
-:focus-visible { outline: 3px solid #85d3ce; outline-offset: 3px; }
+a { color: var(--teal-700); }
+:focus-visible { outline: 3px solid #63c9c1; outline-offset: 3px; }
