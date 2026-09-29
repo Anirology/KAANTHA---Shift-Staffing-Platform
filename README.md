@@ -59,3 +59,16 @@ Run this against each existing environment before testing the second-business fl
 
 Business users can view staffing, worker hours/earnings, and attendance reports, filter them by date, and download either CSV or a branded PDF. PDFs are generated in memory and include the selected business, report purpose, period, Shiftly styling, and page numbers.
 
+## Production deployment
+
+- Live application and backend: https://kaantha-shift-staffing-platform.vercel.app
+- API documentation: https://kaantha-shift-staffing-platform.vercel.app/docs
+- Hosting: Vercel
+- Production database: Neon PostgreSQL through the Vercel integration
+- Required environment variables: `DATABASE_URL`, `JWT_SECRET`
+- Optional configuration variables: `JWT_ALGORITHM`, `ACCESS_TOKEN_MINUTES`, `AUTO_SEED_DATABASE`, `CORS_ORIGINS`, `VITE_API_BASE_URL`
+- Release date: 2026-09-29
+- Application release commit: `9a1cb0a`
+
+Secret values are configured only in Vercel and must never be added to this repository.
+
