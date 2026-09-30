@@ -36,7 +36,7 @@ Follow the complete environment, database migration, GitHub import, and producti
 
 ```powershell
 cd backend
-.\.venv313\Scripts\python.exe -m pytest tests -q --basetemp .test-tmp -p no:cacheprovider
+.\.venv313\Scripts\python.exe -m pytest tests -q
 cd ..\frontend
 npm.cmd run lint
 npm.cmd run build

@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStar } from '@fortawesome/free-solid-svg-icons'
 
 export function Applicants({ shiftId, onNavigate }) {
+  // This screen coordinates application decisions, attendance, ratings, and the applicant profile dialog.
   const [shift, setShift] = useState(null)
   const [applicants, setApplicants] = useState([])
   const [loading, setLoading] = useState(true)
@@ -30,6 +31,7 @@ export function Applicants({ shiftId, onNavigate }) {
   useEffect(() => { const timer = window.setTimeout(load, 0); return () => window.clearTimeout(timer) }, [load])
   function retry() { setLoading(true); setError(''); load() }
   async function act(id, work, success) {
+    // Share one busy/error/refresh path across accept, reject, attendance, rating, and completion actions.
     setProcessingId(id); setActionError(''); setFeedback('')
     try { await work(); if (await load()) setFeedback(success); else setActionError('Action succeeded, but the latest records could not be loaded. Try again.') }
     catch (caught) { setActionError(caught.message) }
@@ -39,6 +41,7 @@ export function Applicants({ shiftId, onNavigate }) {
     setRatingDrafts((current) => ({ ...current, [workerId]: { score: 5, review: '', ...current[workerId], [field]: value } }))
   }
   const openProfile = useCallback(async (workerId) => {
+    // Clear stale modal content before loading the selected worker's profile for this shift.
     setProfileWorkerId(workerId); setProfile(null); setProfileError(''); setProfileLoading(true)
     try { setProfile(await api.applicantProfile(shiftId, workerId)) }
     catch (caught) { setProfileError(caught.message) }

@@ -22,11 +22,13 @@ function lastShiftDay(shift) {
 }
 
 export function MyApplications({ onNavigate }) {
+  // Show application outcomes alongside an upcoming-work timeline for approved shifts.
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   const load = useCallback(async () => {
+    // Fetch application summaries first, then load each associated shift for dates and time details.
     try {
       const applications = await api.myApplications()
       const shifts = await Promise.all(applications.map((item) => api.shift(item.shift_id)))
@@ -40,6 +42,7 @@ export function MyApplications({ onNavigate }) {
 
   const today = new Date(); today.setHours(0, 0, 0, 0)
   const upcoming = records
+    // Only accepted shifts whose final day has not passed and whose business status is still active.
     .filter(({ application, shift }) => application.status === 'ACCEPTED' && lastShiftDay(shift) >= today && !['COMPLETED', 'CANCELLED'].includes(shift.status))
     .sort((a, b) => a.shift.date.localeCompare(b.shift.date) || a.shift.start_time.localeCompare(b.shift.start_time))
 

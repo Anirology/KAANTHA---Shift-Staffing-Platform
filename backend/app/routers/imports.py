@@ -20,6 +20,7 @@ HEADERS = ["role", "date", "duration_days", "start_time", "end_time", "required_
 
 @router.post("/import", response_model=ImportResponse)
 def import_shifts(file: UploadFile = File(...), business: Business = Depends(get_business), db: Session = Depends(get_db)):
+    # Validate file type, size, encoding, and exact column contract before parsing any row.
     if file.content_type not in {"text/csv", "application/csv", "application/vnd.ms-excel"}:
         raise HTTPException(400, "File must be a CSV.")
     raw = file.file.read()
@@ -35,6 +36,7 @@ def import_shifts(file: UploadFile = File(...), business: Business = Depends(get
     rows = list(reader)
     errors = []
     valid = []
+    # Collect row-specific problems so valid rows can still be imported and reported together.
     for row_number, row in enumerate(rows, start=2):
         values = {}
         for field in import_headers:

@@ -11,6 +11,7 @@ from app.schemas.schemas import ApplicationResponse, AvailabilityBase, Availabil
 
 router = APIRouter(tags=["workers"])
 def worker_response(worker: Worker) -> WorkerResponse:
+    # Shape the ORM profile explicitly so nested skills and availability match the public API contract.
     return WorkerResponse(id=worker.id, user_id=worker.user_id, name=worker.name, skills=worker.skills, availability=worker.availability)
 
 
@@ -30,6 +31,7 @@ def get_me(worker: Worker = Depends(get_worker)):
 
 @router.patch("/workers/me", response_model=WorkerResponse)
 def patch_me(data: WorkerPatch, worker: Worker = Depends(get_worker), db: Session = Depends(get_db)):
+    # Apply only fields present in this partial update, then return the refreshed profile.
     if data.name is not None:
         worker.name = data.name
     db.commit(); db.refresh(worker); return worker_response(worker)
@@ -37,6 +39,7 @@ def patch_me(data: WorkerPatch, worker: Worker = Depends(get_worker), db: Sessio
 
 @router.post("/workers/me/skills", response_model=SkillResponse, status_code=201)
 def add_skill(data: SkillLink, worker: Worker = Depends(get_worker), db: Session = Depends(get_db)):
+    # Validate the catalogue entry and duplicate membership before inserting the join-table row.
     skill = db.get(Skill, data.skill_id)
     if not skill: raise HTTPException(404, "Skill not found.")
     if db.scalar(select(WorkerSkill).where(WorkerSkill.worker_id == worker.id, WorkerSkill.skill_id == skill.id)):
@@ -53,6 +56,7 @@ def delete_skill(skill_id: int, worker: Worker = Depends(get_worker), db: Sessio
 
 @router.post("/workers/me/availability", response_model=AvailabilityResponse, status_code=201)
 def add_availability(data: AvailabilityBase, worker: Worker = Depends(get_worker), db: Session = Depends(get_db)):
+    # Pydantic validates the time range before this worker-owned availability slot is stored.
     item = WorkerAvailability(worker_id=worker.id, **data.model_dump()); db.add(item); db.commit(); db.refresh(item); return item
 
 

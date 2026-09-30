@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    # Defaults support local development; deployment environment variables override these values.
     database_url: str = "sqlite:///./shiftly.db"
     jwt_secret: str = secrets.token_urlsafe(32)
     jwt_algorithm: str = "HS256"
@@ -18,11 +19,13 @@ class Settings(BaseSettings):
 
     @property
     def allowed_origins(self) -> list[str]:
+        # CORS expects a list, while environment configuration is kept as one comma-separated value.
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 settings = Settings()
 
+# Refuse ephemeral SQLite and generated secrets in hosted deployments where persistence matters.
 if os.getenv("VERCEL"):
     if settings.database_url.startswith("sqlite"):
         raise RuntimeError("DATABASE_URL must point to a persistent database on Vercel.")

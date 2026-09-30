@@ -40,6 +40,7 @@ function routeFor(path) {
 }
 
 function guideFor(route) {
+  // Keep short page instructions in one lookup so every route uses consistent guidance.
   const guides = {
     '/worker': ['Browse shifts', 'Use the filters to narrow the list, then open a shift to check its requirements before applying.'],
     '/worker/applications': ['My applications', 'PENDING means the business is reviewing it. ACCEPTED shifts are confirmed work.'],
@@ -56,6 +57,7 @@ function guideFor(route) {
 }
 
 export default function App() {
+  // This component owns the session, active workspace, route selection, and top-level modals.
   const [path, setPath] = useState(currentPath)
   const [account, setAccount] = useState(null)
   const [activeBusinessId, setActiveBusinessId] = useState(getBusinessId())
@@ -63,6 +65,7 @@ export default function App() {
   const [sessionError, setSessionError] = useState('')
 
   useEffect(() => {
+    // Keep browser back/forward navigation and global session expiry synchronized with React state.
     const onHashChange = () => setPath(currentPath())
     const onExpired = () => {
       setAccount(null)
@@ -79,6 +82,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    // Restore the signed-in profile once so protected pages know which account is active.
     if (!getToken()) return
     // Ignore late session-check responses if the app unmounts before the request finishes.
     let active = true
@@ -115,6 +119,7 @@ export default function App() {
   }
 
   function onLogin(result, user) {
+    // Store credentials and choose the first business workspace before navigating home.
     saveToken(result.access_token)
     setAccount(user)
     if (user.role === 'BUSINESS' && user.businesses.length) {
@@ -139,6 +144,7 @@ export default function App() {
   }
 
   function logout() {
+    // Clear both login and workspace selection so another account cannot inherit this session context.
     clearToken()
     setAccount(null)
     setActiveBusinessId(null)
@@ -146,9 +152,11 @@ export default function App() {
   }
 
   const route = routeFor(path)
+  // Resolve one page component from the current hash and the authenticated account role.
   const createShiftModal = route.path === '/business/shifts/new' && account?.role === 'BUSINESS'
   const guide = account && !createShiftModal ? guideFor(route) : null
   let content
+  // Each branch maps one route to its screen; the role guard above prevents cross-dashboard access.
   if (checking) {
     content = <p role="status">Checking your session…</p>
   } else if (route.role && account?.role !== route.role) {

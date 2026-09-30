@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendarDays, faClock, faCoins, faFileLines, faUsers } from '@fortawesome/free-solid-svg-icons'
 
 function shiftDateLabel(shift) {
+  // Display one date or calculate the last calendar date covered by a multi-day commitment.
   if ((shift.duration_days || 1) === 1) return shift.date
   const lastDay = new Date(`${shift.date}T00:00:00Z`)
   lastDay.setUTCDate(lastDay.getUTCDate() + shift.duration_days - 1)

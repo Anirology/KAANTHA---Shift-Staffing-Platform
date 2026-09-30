@@ -26,6 +26,7 @@ from app.services.schedule import shift_end_date
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 REPORTS = {
+    # Keep export titles, descriptions, and column order aligned with each response schema.
     "staffing": {
         "title": "Staffing Report",
         "description": "Shows how fully each shift is staffed and where positions remain open.",
@@ -55,6 +56,7 @@ def filtered_shifts(business_id: int, from_date: date | None, to_date: date | No
 
 
 def rows_for_staffing(shifts, db):
+    # Convert each shift and its accepted applications to flat values suitable for tabular output.
     rows = []
     for shift in shifts:
         accepted = [item for item in shift.applications if item.status == ApplicationStatus.ACCEPTED.value]
@@ -69,6 +71,7 @@ def staffing(from_date: date | None = None, to_date: date | None = None, busines
 
 @router.get("/workers", response_model=list[WorkerReport])
 def workers(from_date: date | None = None, to_date: date | None = None, business: Business = Depends(get_business), db: Session = Depends(get_db)):
+    # Count earnings only for completed shifts where an accepted worker was marked present.
     result = {}
     for shift in filtered_shifts(business.id, from_date, to_date, db):
         if shift.status != ShiftStatus.COMPLETED.value: continue
@@ -82,6 +85,7 @@ def workers(from_date: date | None = None, to_date: date | None = None, business
 
 @router.get("/attendance", response_model=list[AttendanceReport])
 def attendance(from_date: date | None = None, to_date: date | None = None, business: Business = Depends(get_business), db: Session = Depends(get_db)):
+    # Keep one row per application so pending, rejected, and attendance outcomes remain visible.
     rows = []
     for shift in filtered_shifts(business.id, from_date, to_date, db):
         for item in shift.applications:
@@ -90,12 +94,14 @@ def attendance(from_date: date | None = None, to_date: date | None = None, busin
 
 
 def export_csv(headers, rows):
+    # CSV responses stream text to the browser with a download filename.
     output = io.StringIO(); writer = csv.DictWriter(output, fieldnames=headers); writer.writeheader()
     for row in rows: writer.writerow({key: (str(value) if value is not None else "") for key, value in row.items()})
     return StreamingResponse(iter([output.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=report.csv"})
 
 
 def export_pdf(kind: str, rows, business: Business, from_date: date | None, to_date: date | None):
+    # Build a paginated branded PDF in memory, so exports need no temporary disk file.
     metadata = REPORTS[kind]
     output = io.BytesIO()
     document = SimpleDocTemplate(output, pagesize=landscape(A4), leftMargin=15 * mm, rightMargin=15 * mm, topMargin=18 * mm, bottomMargin=16 * mm)
@@ -107,7 +113,9 @@ def export_pdf(kind: str, rows, business: Business, from_date: date | None, to_d
     header_style = ParagraphStyle("ShiftlyHeader", parent=styles["BodyText"], textColor=colors.white, fontSize=7, leading=9)
     cell_style = ParagraphStyle("ShiftlyCell", parent=styles["BodyText"], textColor=colors.HexColor("#17313A"), fontSize=7, leading=9)
     period = f"{from_date or 'All dates'} to {to_date or 'All dates'}" if from_date or to_date else "All dates"
+    # Assemble reusable title, metadata, table, and footer elements before rendering pages.
     story = []
+    # Construct the PDF as a sequence of report elements; the footer is applied to every page below.
     logo_path = Path(__file__).resolve().parents[3] / "frontend" / "public" / "shiftly-logo.png"
     brand = [Paragraph("<b>SHIFTLY</b>", brand_style)]
     if logo_path.exists():

@@ -4,6 +4,7 @@ from sqlalchemy import inspect, text
 
 
 def apply_migration(connection) -> bool:
+    # Add the duration column only when absent; existing shifts become one-day shifts by default.
     dialect = connection.dialect.name
     if dialect not in {"mysql", "postgresql"}:
         raise RuntimeError(f"Shift duration migration does not support {dialect}.")

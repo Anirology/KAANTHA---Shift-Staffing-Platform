@@ -17,6 +17,7 @@ const cell = (field, value) => value == null ? '—' : ['payment', 'total_earnin
 const rowKey = (kind, row) => kind === 'staffing' ? row.shift_id : kind === 'workers' ? row.worker_id : `${row.shift_id}-${row.worker_id}`
 
 export function Reports() {
+  // Filter a selected report once, then use the same date range for its CSV or PDF download.
   const [kind, setKind] = useState('staffing')
   const [draft, setDraft] = useState({ from_date: '', to_date: '' })
   const [filters, setFilters] = useState({ from_date: '', to_date: '' })
@@ -27,6 +28,7 @@ export function Reports() {
   const [exportError, setExportError] = useState('')
   const requestId = useRef(0)
   const load = useCallback(async () => {
+    // The report kind and date filters determine both the displayed rows and export parameters.
     // Discard stale responses when the user changes report type or date filters mid-request.
     const id = ++requestId.current
     try { const data = await api.report(kind, filters); if (id === requestId.current) { setRows(data); setError('') } }
@@ -35,6 +37,7 @@ export function Reports() {
   }, [kind, filters])
   useEffect(() => { const timer = window.setTimeout(load, 0); return () => window.clearTimeout(timer) }, [load])
   async function download(format) {
+    // Request the selected format and start a browser download from the binary response.
     setExporting(format); setExportError('')
     try {
       const blob = await api.exportReport(kind, filters, format)

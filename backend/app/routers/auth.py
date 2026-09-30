@@ -15,6 +15,7 @@ password_hash = PasswordHash.recommended()
 
 
 def register(db: Session, email: str, password: str, role: UserRole, profile):
+    # Shared registration path hashes credentials, creates the role-specific profile, and commits both.
     if db.scalar(select(User).where(User.email == email)):
         raise HTTPException(409, "Email is already registered.")
     user = User(email=email, password_hash=password_hash.hash(password), role=role.value)
@@ -37,6 +38,7 @@ def register_business(data: RegisterBusiness, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=LoginResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
+    # Return identical errors for unknown emails and wrong passwords to avoid account enumeration.
     user = db.scalar(select(User).where(User.email == data.email))
     if not user or not password_hash.verify(data.password, user.password_hash):
         raise HTTPException(401, "Incorrect email or password.")
@@ -45,6 +47,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=MeResponse)
 def me(user: User = Depends(get_current_user)):
+    # Return the account and profile identifiers the frontend needs to restore its dashboard.
     businesses = sorted(user.businesses, key=lambda item: item.id)
     worker = user.worker
     return MeResponse(id=user.id, email=user.email, role=user.role, worker_id=worker.id if worker else None, business_id=businesses[0].id if businesses else None, businesses=businesses, worker_name=worker.name if worker else None)

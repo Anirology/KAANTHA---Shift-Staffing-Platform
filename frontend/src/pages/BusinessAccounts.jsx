@@ -11,6 +11,7 @@ export function BusinessAccounts({ businesses, activeBusinessId, onSelect, onAdd
   const [error, setError] = useState('')
 
   async function submit(event) {
+    // Create a workspace under this login, then let the parent select it as active.
     event.preventDefault()
     const businessName = name.trim()
     if (!businessName) { setError('Enter a business name.'); return }
@@ -21,6 +22,7 @@ export function BusinessAccounts({ businesses, activeBusinessId, onSelect, onAdd
     finally { setBusy(false) }
   }
 
+  // Resolve the selected profile for the summary while the cards below show every workspace.
   const activeBusiness = businesses.find((business) => business.id === activeBusinessId)
 
   return <div className="screen business-accounts-screen">

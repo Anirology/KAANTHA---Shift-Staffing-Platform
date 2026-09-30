@@ -13,6 +13,7 @@ export function Login({ onLogin, onNavigate }) {
   const [error, setError] = useState('')
 
   async function submit(event) {
+    // Confirm both login and profile response agree before treating the browser as authenticated.
     event.preventDefault()
     setError('')
     if (password.length < 8) {

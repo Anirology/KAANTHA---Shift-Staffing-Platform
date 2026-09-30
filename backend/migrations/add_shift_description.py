@@ -8,6 +8,7 @@ from app.database import engine
 
 
 def apply_migration(connection) -> bool:
+    # Inspect the existing table first so rerunning this additive migration is safe.
     dialect = connection.dialect.name
     inspector = inspect(connection)
     if dialect not in {"mysql", "postgresql"} or not inspector.has_table("shifts"):
@@ -29,6 +30,7 @@ def apply_migration(connection) -> bool:
 
 
 def main():
+    # Default command prints schema state; --apply opts into the reviewed ALTER TABLE change.
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true", help="apply the reviewed schema change")
     args = parser.parse_args()

@@ -25,6 +25,7 @@ def accept_application(db: Session, application_id: int, business_id: int) -> Ap
     skill = db.scalar(select(WorkerSkill).where(WorkerSkill.worker_id == application.worker_id, WorkerSkill.skill_id == shift.required_skill_id))
     if not skill:
         raise HTTPException(409, "Worker does not have the required skill.")
+    # Search nearby accepted shifts because a multi-day shift can overlap beyond its start date.
     existing_shift = aliased(Shift)
     existing_shifts = db.scalars(select(existing_shift).join(Application, Application.shift_id == existing_shift.id).where(
         Application.worker_id == application.worker_id,
@@ -35,6 +36,7 @@ def accept_application(db: Session, application_id: int, business_id: int) -> Ap
     if any(shifts_overlap(shift, item) for item in existing_shifts):
         raise HTTPException(409, "Worker has an overlapping accepted shift.")
     # Recount under the lock before changing status, then update both records together.
+    # Check capacity after locking, then save acceptance and its attendance record in one transaction.
     accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0
     if accepted >= shift.required_workers:
         raise HTTPException(409, "Shift capacity is full.")

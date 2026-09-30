@@ -8,4 +8,3 @@ frontend/dist/
 !**/.env.example
 backend/backups/
 **/.pytest_cache/
-**/.test-*/

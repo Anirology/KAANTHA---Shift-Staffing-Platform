@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendarDays, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 
 export function BrowseShifts({ onNavigate }) {
+  // Worker search filters are kept locally and sent to the API only when the form is submitted.
   const [filters, setFilters] = useState({ role: '', skill_id: '', date: '', min_payment: '' })
   const [query, setQuery] = useState({ status: 'OPEN' })
   const [shifts, setShifts] = useState([])
@@ -23,6 +24,7 @@ export function BrowseShifts({ onNavigate }) {
   const [addingSkill, setAddingSkill] = useState(false)
 
   const load = useCallback(async () => {
+    // Load listings, the skill dropdown, and the current worker's skills together for match labels.
     try {
       const [shiftList, skillList, worker] = await Promise.all([api.shifts(query), api.skills(), api.workerProfile()])
       setShifts(shiftList)
@@ -51,6 +53,7 @@ export function BrowseShifts({ onNavigate }) {
   }
 
   function clearFilters() {
+    // Reset both visible form values and the API query; otherwise old filters would still apply.
     const empty = { role: '', skill_id: '', date: '', min_payment: '' }
     setFilters(empty)
     setLoading(true)

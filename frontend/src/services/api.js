@@ -14,6 +14,7 @@ function validOrigin(value) {
 }
 
 function queryString(filters = {}) {
+  // Omit blank filters so URL query parameters represent only active search criteria.
   const query = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== '' && value != null))
   return query.size ? `?${query}` : ''
 }
@@ -29,6 +30,7 @@ export function getToken() {
 }
 
 export function saveToken(token) {
+  // A new login starts without a previous account's selected business workspace.
   sessionStorage.setItem(tokenKey, token)
   sessionStorage.removeItem(businessKey)
 }
@@ -47,9 +49,11 @@ export function saveBusinessId(id) {
 }
 
 async function request(path, { method = 'GET', body, protectedRequest = false, token, responseType = 'json', accept } = {}) {
+  // Shared transport adds auth/workspace headers and gives every screen consistent failures.
   if (!validOrigin(origin) || (import.meta.env.PROD && !origin.startsWith('https://'))) throw new Error('The Shiftly API origin is invalid.')
   const bearer = token || (protectedRequest ? getToken() : null)
   let response
+  // Keep JSON and multipart uploads distinct: the browser must set a boundary for FormData.
   try {
     response = await fetch(`${baseUrl}${path}`, {
       method,
@@ -70,6 +74,7 @@ async function request(path, { method = 'GET', body, protectedRequest = false, t
     clearToken()
     window.dispatchEvent(new Event('shiftly:session-expired'))
   }
+  // Download binary exports as blobs; parse ordinary API responses as JSON when available.
   const data = response.ok && responseType === 'blob' ? await response.blob() : await response.json().catch(() => null)
   if (!response.ok) {
     throw new Error(errorMessage(response.status, data))
@@ -78,6 +83,7 @@ async function request(path, { method = 'GET', body, protectedRequest = false, t
 }
 
 export const api = {
+  // Endpoint methods keep page components declarative and centralize URL construction.
   registerWorker: ({ email, password, name }) => request('/auth/register/worker', { method: 'POST', body: { email, password, name } }),
   registerBusiness: ({ email, password, business_name }) => request('/auth/register/business', { method: 'POST', body: { email, password, business_name } }),
   login: ({ email, password }) => request('/auth/login', { method: 'POST', body: { email, password } }),

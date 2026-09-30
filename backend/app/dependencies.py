@@ -35,6 +35,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
 def require_role(role: UserRole):
+    # Return a dependency FastAPI can attach to endpoints that belong to one account type.
     def dependency(user: User = Depends(get_current_user)) -> User:
         if user.role != role.value:
             raise HTTPException(status_code=403, detail="You do not have permission for this resource.")
@@ -63,4 +64,5 @@ def resolve_business(user: User, business_id: int | None, db: Session) -> Busine
 
 
 def get_business(user: User = Depends(require_role(UserRole.BUSINESS)), db: Session = Depends(get_db), business_id: int | None = Header(default=None, alias="X-Business-Id")) -> Business:
+    # Resolve the selected workspace from a header, then verify ownership in resolve_business.
     return resolve_business(user, business_id, db)

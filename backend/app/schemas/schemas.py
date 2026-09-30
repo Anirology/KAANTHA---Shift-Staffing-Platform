@@ -12,12 +12,14 @@ DateType = date
 TimeType = time
 
 
+# Shared validator used when a schema needs to enforce same-day start/end ordering.
 def valid_times(start: time, end: time) -> tuple[time, time]:
     if start >= end:
         raise ValueError("start_time must be before end_time")
     return start, end
 
 
+# Request/response schemas validate incoming JSON and control which database fields leave the API.
 class RegisterWorker(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
@@ -83,6 +85,7 @@ class SkillResponse(BaseModel):
 
 
 class AvailabilityBase(BaseModel):
+    # Validate related fields together so an availability interval cannot end before it starts.
     date: date
     start_time: time
     end_time: time
@@ -125,6 +128,7 @@ class SkillLink(BaseModel):
 
 
 class ShiftBase(BaseModel):
+    # Creation schema: constraints here reject invalid shift data before router code touches the DB.
     role: str = Field(min_length=1, max_length=100)
     description: str | None = Field(default=None, max_length=1000)
     date: date
@@ -144,6 +148,7 @@ class ShiftBase(BaseModel):
         return value
 
 class ShiftPatch(BaseModel):
+    # Patch fields are optional so callers can edit one value; null is separately rejected for duration.
     role: str | None = Field(default=None, min_length=1, max_length=100)
     description: str | None = Field(default=None, max_length=1000)
     date: DateType | None = None
@@ -163,6 +168,7 @@ class ShiftPatch(BaseModel):
 
 
 class ShiftResponse(BaseModel):
+    # Enriched output includes derived staffing/payment fields not stored directly in the shifts table.
     id: int
     business_id: int
     business_name: str
@@ -199,6 +205,7 @@ class RejectionRequest(BaseModel):
 
 
 class AttendanceRequest(BaseModel):
+    # NOT_MARKED is an initial state, not a valid business decision sent by this endpoint.
     status: AttendanceStatus
 
     @field_validator("status")
@@ -223,6 +230,7 @@ class ImportResponse(BaseModel):
 
 
 class DateFilter(BaseModel):
+    # Reusable optional bounds for APIs that need a date window.
     from_date: DateType | None = None
     to_date: DateType | None = None
 
@@ -259,6 +267,7 @@ class AttendanceReport(BaseModel):
 
 
 class RatingCreate(BaseModel):
+    # Rating input is bounded to five stars and a short optional review.
     score: int = Field(ge=1, le=5)
     review: str | None = Field(default=None, max_length=1000)
 
@@ -276,6 +285,7 @@ class RatingResponse(BaseModel):
 
 
 class ApplicantProfileResponse(BaseModel):
+    # Profile view shown to the business that owns a shift with this applicant.
     id: int
     name: str
     skills: list[SkillResponse]

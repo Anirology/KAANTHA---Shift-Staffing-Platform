@@ -9,6 +9,7 @@ from migrations.add_shift_description import apply_migration as add_shift_descri
 from migrations.add_shift_duration import apply_migration as add_shift_duration
 
 STARTER_SKILLS = (
+    # Small catalogue available to new workers and shift listings on a fresh database.
     ("Cashier", "Handles checkout and customer payments."),
     ("Server", "Serves food and beverages to customers."),
     ("Kitchen Assistant", "Supports kitchen preparation and cleaning."),
@@ -19,6 +20,7 @@ STARTER_SKILLS = (
 
 
 def seed() -> int:
+    # This operation is additive: it migrates supported schemas and adds missing starter rows only.
     # Bring existing supported databases forward before create_all adds any new tables.
     with engine.begin() as connection:
         allow_multiple_businesses(connection)

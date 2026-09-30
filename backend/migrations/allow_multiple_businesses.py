@@ -16,6 +16,7 @@ from app.database import engine
 
 
 def targets(connection):
+    # Detect both forms databases use for enforcing a one-business-per-user rule.
     # Database engines can represent a one-column uniqueness rule as either a constraint or an index.
     inspector = inspect(connection)
     constraints = [item["name"] for item in inspector.get_unique_constraints("businesses")
@@ -35,6 +36,7 @@ def apply_migration(connection) -> bool:
         connection.execute(text("SELECT pg_advisory_xact_lock(73194281)"))
     elif dialect == "mysql":
         connection.execute(text("SELECT GET_LOCK('shiftly_multiple_businesses', 10)"))
+    # A database lock prevents concurrent app instances from racing while altering this table.
     try:
         constraints, indexes = targets(connection)
         if not constraints and not indexes:

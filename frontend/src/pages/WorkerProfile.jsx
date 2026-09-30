@@ -10,6 +10,7 @@ const blank = { date: '', start_time: '', end_time: '' }
 const time = (value) => value?.slice(0, 5) || ''
 
 export function WorkerProfile() {
+  // Combine editable identity, skills, availability, and received ratings in the worker dashboard.
   const [profile, setProfile] = useState(null)
   const [catalogue, setCatalogue] = useState([])
   const [ratings, setRatings] = useState([])
@@ -24,6 +25,7 @@ export function WorkerProfile() {
   const [actionError, setActionError] = useState('')
 
   const load = useCallback(async () => {
+    // Fetch profile, catalogue, and feedback together so each section renders from one refresh.
     try {
       const [worker, skills, feedback] = await Promise.all([api.workerProfile(), api.skills(), api.myRatings()])
       setProfile(worker); setCatalogue(skills); setRatings(feedback); setName(worker.name); setError(''); return true
@@ -32,6 +34,7 @@ export function WorkerProfile() {
   }, [])
   useEffect(() => { const timer = window.setTimeout(load, 0); return () => window.clearTimeout(timer) }, [load])
   async function action(work, success) {
+    // Run one profile mutation, reload canonical server data, then show success only after refresh.
     setBusy(true); setActionError(''); setMessage('')
     try { await work(); if (!await load()) { setActionError('Change saved, but the profile could not be refreshed. Try again.'); return false }; window.dispatchEvent(new Event('shiftly:account-updated')); setMessage(success); return true }
     catch (caught) { setActionError(caught.message); return false }

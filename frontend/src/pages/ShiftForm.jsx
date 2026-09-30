@@ -10,6 +10,7 @@ import { StatusMessage } from '../components/StatusMessage'
 const initial = { role: '', description: '', date: '', duration_days: '1', start_time: '', end_time: '', required_workers: '1', payment: '', required_skill_id: '' }
 
 export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
+  // A missing ID creates a listing; an ID loads and updates the existing listing.
   const editing = Boolean(shiftId)
   const [fields, setFields] = useState(initial)
   const [skills, setSkills] = useState([])
@@ -21,6 +22,7 @@ export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
+    // Load the skill catalogue and, for edits, the shift in parallel to shorten form startup.
     try {
       const [skillList, current] = await Promise.all([api.skills(), editing ? api.shift(shiftId) : Promise.resolve(null)])
       setSkills(skillList)
@@ -49,6 +51,7 @@ export function ShiftForm({ shiftId, onNavigate, isModal = false }) {
     if (values.start_time >= values.end_time) { setFormError('End time must be after start time on the same date.'); return }
     if (!/^\d+(\.\d{1,2})?$/.test(values.payment || '')) { setFormError('Enter a valid LKR amount with at most two decimal places.'); return }
     if (!values.required_skill_id) { setFormError('Choose a required skill.'); return }
+    // Convert browser input strings to the API's numeric, decimal, and HH:MM:SS formats.
     const payload = {
       role: values.role.trim(), description: values.description?.trim() || null, date: values.date, start_time: toApiTime(values.start_time), end_time: toApiTime(values.end_time),
       duration_days: Number(values.duration_days), required_workers: Number(values.required_workers), payment: decimalString(values.payment), required_skill_id: Number(values.required_skill_id),

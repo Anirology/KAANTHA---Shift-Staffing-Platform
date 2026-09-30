@@ -8,6 +8,7 @@ import { StatusMessage } from '../components/StatusMessage'
 import { formatMoney } from '../utils/format'
 
 export function ManageShifts({ businessName, onNavigate }) {
+  // Keep fetched shifts and action feedback separate so loading errors do not hide successful actions.
   const [shifts, setShifts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -16,6 +17,7 @@ export function ManageShifts({ businessName, onNavigate }) {
   const [processingId, setProcessingId] = useState(null)
 
   const load = useCallback(async () => {
+    // Refresh the active business workspace's listings from the API.
     try { setShifts(await api.businessShifts()) }
     catch (caught) { setError(caught.message) }
     finally { setLoading(false) }

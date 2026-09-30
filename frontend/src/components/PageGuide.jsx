@@ -2,6 +2,7 @@
 import { useState } from 'react'
 
 export function PageGuide({ guideKey, title, children }) {
+  // Store dismissal independently for each route so one closed tip does not hide every tip.
   const storageKey = `shiftly_guide_${guideKey}`
   const [open, setOpen] = useState(() => window.localStorage.getItem(storageKey) !== 'closed')
 

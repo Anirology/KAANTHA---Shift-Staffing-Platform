@@ -13,6 +13,7 @@ from app.seed_skills import seed
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # Seed only under the configured local switch or on the named hosting platform.
     if settings.auto_seed_database or os.getenv("VERCEL"):
         seed()
     yield
@@ -20,6 +21,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Shiftly API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
+	# Browser frontends on approved origins may call the API and send bearer tokens.
 	CORSMiddleware,
 	allow_origins=settings.allowed_origins,
 	allow_credentials=True,

@@ -8,8 +8,10 @@ function formatTime(value) {
 }
 
 export function ApplicantProfileModal({ profile, loading, error, onRetry, onClose }) {
+  // Present loading, failure, and profile states within the same accessible modal shell.
   const dialog = useRef(null)
   useEffect(() => {
+    // Lock page scrolling and support Escape while this overlay is open.
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     dialog.current?.focus()

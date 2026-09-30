@@ -15,6 +15,7 @@ export function BusinessRegistration({ onNavigate }) {
   const [created, setCreated] = useState(false)
 
   async function submit(event) {
+    // Create the account and first business workspace together through the registration endpoint.
     event.preventDefault()
     setError('')
     if (!businessName.trim()) { setError('Enter your business name.'); return }

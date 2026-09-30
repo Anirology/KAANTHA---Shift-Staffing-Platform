@@ -15,6 +15,7 @@ export function WorkerRegistration({ onNavigate }) {
   const [created, setCreated] = useState(false)
 
   async function submit(event) {
+    // Validate required identity fields here, then let the API enforce the same rules server-side.
     event.preventDefault()
     setError('')
     if (!name.trim()) { setError('Enter your name.'); return }

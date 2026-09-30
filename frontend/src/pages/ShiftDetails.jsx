@@ -16,6 +16,7 @@ export function ShiftDetails({ shiftId, accountRole, onNavigate }) {
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
+    // Worker detail pages also load applications to show whether this worker has already applied.
     try {
       const [record, applications] = await Promise.all([api.shift(shiftId), accountRole === 'WORKER' ? api.myApplications() : Promise.resolve([])])
       setShift(record)
@@ -27,6 +28,7 @@ export function ShiftDetails({ shiftId, accountRole, onNavigate }) {
   function retry() { setLoading(true); setError(''); load() }
 
   async function apply() {
+    // Keep the shift visible and update local application state from the server response.
     setBusy(true)
     setActionError('')
     try { setApplication(await api.apply(shiftId)) }

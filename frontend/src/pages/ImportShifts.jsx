@@ -5,11 +5,13 @@ import { Button } from '../components/Button'
 import { StatusMessage } from '../components/StatusMessage'
 
 export function ImportShifts() {
+  // Upload the selected CSV and present both successfully created rows and row-specific errors.
   const [file, setFile] = useState(null)
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   async function submit(event) {
+    // Send the original file as multipart data; the API returns counts and per-row validation errors.
     event.preventDefault(); if (!file) return
     setBusy(true); setError(''); setResult(null)
     try { setResult(await api.importShifts(file)) }

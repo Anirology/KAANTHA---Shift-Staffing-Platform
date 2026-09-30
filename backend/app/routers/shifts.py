@@ -20,6 +20,7 @@ router = APIRouter(tags=["shifts", "applications"])
 
 
 def shift_response(shift: Shift, db: Session) -> ShiftResponse:
+    # Add computed staffing counts and readable names to the underlying shift record.
     accepted = db.scalar(select(func.count(Application.id)).where(Application.shift_id == shift.id, Application.status == ApplicationStatus.ACCEPTED.value)) or 0
     return ShiftResponse(id=shift.id, business_id=shift.business_id, business_name=shift.business.business_name, role=shift.role, description=shift.description, date=shift.date, duration_days=shift.duration_days, start_time=shift.start_time, end_time=shift.end_time, required_workers=shift.required_workers, payment=shift.payment, total_payment=shift.payment * shift.duration_days, required_skill_id=shift.required_skill_id, required_skill_name=shift.required_skill.name, status=shift.status, accepted_count=accepted, remaining_slots=max(shift.required_workers - accepted, 0))
 
@@ -35,6 +36,7 @@ def owned_application(application_id: int, business: Business, db: Session) -> A
 
 @router.get("/shifts", response_model=list[ShiftResponse])
 def list_shifts(role: str | None = None, skill_id: int | None = None, date: date | None = None, min_payment: Decimal | None = None, status: ShiftStatus | None = None, _: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Build filters only for query parameters the caller supplied; workers see matching listings.
     query = select(Shift).options(joinedload(Shift.business), joinedload(Shift.required_skill))
     if role: query = query.where(Shift.role == role)
     if skill_id: query = query.where(Shift.required_skill_id == skill_id)
@@ -78,6 +80,7 @@ def create_shift(data: ShiftBase, business: Business = Depends(get_business), db
 
 @router.patch("/shifts/{shift_id}", response_model=ShiftResponse)
 def update_shift(shift_id: int, data: ShiftPatch, business: Business = Depends(get_business), db: Session = Depends(get_db)):
+    # Protect confirmed workers while validating every proposed change against the new schedule.
     shift = db.get(Shift, shift_id)
     if not shift: raise HTTPException(404, "Shift not found.")
     if shift.business_id != business.id: raise HTTPException(403, "You do not own this shift.")
@@ -145,6 +148,7 @@ def shift_applications(shift_id: int, business: Business = Depends(get_business)
 
 @router.get("/shifts/{shift_id}/applicants/{worker_id}/profile", response_model=ApplicantProfileResponse)
 def applicant_profile(shift_id: int, worker_id: int, business: Business = Depends(get_business), db: Session = Depends(get_db)):
+    # Require ownership of the shift and an application before exposing applicant profile details.
     shift = db.get(Shift, shift_id)
     if not shift:
         raise HTTPException(404, "Shift not found.")
@@ -198,6 +202,7 @@ def attendance(id: int, data: AttendanceRequest, business: Business = Depends(ge
 
 @router.patch("/shifts/{shift_id}/complete", response_model=ShiftResponse)
 def complete(shift_id: int, business: Business = Depends(get_business), db: Session = Depends(get_db)):
+    # Completion is allowed only after at least one accepted worker has a final attendance status.
     shift = db.get(Shift, shift_id)
     if not shift: raise HTTPException(404, "Shift not found.")
     if shift.business_id != business.id: raise HTTPException(403, "You do not own this shift.")

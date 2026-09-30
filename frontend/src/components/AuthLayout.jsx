@@ -1,5 +1,6 @@
 // Provide the shared layout for sign-in and registration screens.
 export function AuthLayout({ eyebrow, title, description, children }) {
+  // Keep registration and sign-in pages visually consistent while each form stays page-specific.
   return (
     <div className="auth-grid">
       <section className="intro" aria-label="About Shiftly">

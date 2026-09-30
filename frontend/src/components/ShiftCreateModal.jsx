@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react'
 
 export function ShiftCreateModal({ children, onClose }) {
+  // Preserve and restore page scrolling while the dialog is open; Escape and backdrop close it.
   const dialog = useRef(null)
   useEffect(() => {
     const previousOverflow = document.body.style.overflow

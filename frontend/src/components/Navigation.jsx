@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRightFromBracket, faBriefcase, faBuilding, faChartColumn, faFileCirclePlus, faFileLines, faMagnifyingGlass, faUser } from '@fortawesome/free-solid-svg-icons'
 
 const workerLinks = [
+  // Role-specific navigation is data-driven so labels, icons, and route targets stay together.
   { path: '/worker', label: 'Browse shifts', icon: faMagnifyingGlass },
   { path: '/worker/applications', label: 'My applications', icon: faFileLines },
   { path: '/worker/profile', label: 'Profile & ratings', icon: faUser },
